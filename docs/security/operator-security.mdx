@@ -1,0 +1,42 @@
+---
+title: Operator security
+description: Practical safeguards for running the BebopC2 teamserver and console.
+---
+
+# Operator security
+
+The operator console controls live tasking. Protect it like privileged infrastructure.
+
+## Network exposure
+
+Bind management services to trusted interfaces whenever possible. If remote access is required, place the operator client behind a trusted tunnel, VPN, or reverse proxy with authentication.
+
+Avoid exposing the management API directly to the internet.
+
+## Filesystem protection
+
+The teamserver persists operational state under `~/.bebop/`, including listener state, events, results, loot metadata, terminal state, and RSA key material.
+
+Recommended controls:
+
+- use a dedicated operator account
+- restrict filesystem permissions
+- back up only the data required by the engagement
+- clean loot and results after retention ends
+- do not reuse sensitive operation directories across unrelated engagements
+
+## Secrets
+
+Protect:
+
+- teamserver RSA private key
+- generated beacon artifacts
+- uploaded loot
+- operator terminal history
+- screenshots and exported reports
+
+If a teamserver key is exposed, rotate it and rebuild beacons that depend on that trust path.
+
+## Multi-operator environments
+
+Until multi-operator authentication is implemented, treat shared console access as shared trust. Use external access controls and clear operational procedures to prevent accidental task collisions.

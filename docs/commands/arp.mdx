@@ -1,0 +1,26 @@
+---
+title: arp
+description: Display Windows ARP cache entries.
+---
+
+# arp
+
+## Usage
+
+```text
+[BEBOP ~]$ arp
+```
+
+## How it works
+
+Windows calls `GetIpNetTable`, formats IPv4 and MAC entries, then maps ARP row type to `Dynamic`, `Static`, `Other`, or `Invalid`.
+
+## Output
+
+```text
+IP Address        MAC Address           Type
+----------        -----------           ----
+10.10.11.1        00-50-56-B0-01-01     Dynamic
+```
+
+Windows-only native command.

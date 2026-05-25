@@ -1,0 +1,38 @@
+---
+title: bof-execute
+description: Queue a Windows x64 BOF object for in-process execution.
+---
+
+# bof-execute
+
+## Usage
+
+```text
+[BEBOP ~]$ bof-execute [args]
+[BEBOP ~]$ bof-execute <name.o|name.obj> [args]
+```
+
+No name opens a local `.o` / `.obj` picker. A name resolves from operator uploads first, then built-in BOFs.
+
+## How it works
+
+The teamserver validates the object as x64 COFF, packs arguments, and queues `TaskBOF`. The beacon COFF loader maps sections, applies AMD64 relocations, resolves imports such as `KERNEL32$...`, calls the `go` symbol, and returns collected BOF output.
+
+## Output
+
+```text
+[*] bof queued (label: 132969452, object: 1194 bytes)
+[+] task delivered to beacon
+Bebop BOF smoke test OK
+Current PID: 3308
+First arg length: 4
+First arg: adaw
+```
+
+Errors:
+
+```text
+bof: unresolved symbol: KERNEL32$ExampleFunction
+bof: unsupported relocation
+bof: missing go
+```

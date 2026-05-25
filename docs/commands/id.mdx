@@ -1,0 +1,24 @@
+---
+title: id
+description: Linux identity alias for whoami.
+---
+
+# id
+
+## Usage
+
+```text
+[BEBOP ~]$ id
+```
+
+## How it works
+
+Linux handles `id` as an alias of `whoami` inside `beacon-linux/src/exec/builtin.c`. It reads UID, EUID, GID, EGID, usernames, group names, and supplementary groups with libc identity APIs.
+
+Windows does not implement `id`; use `whoami`, `groups`, `privs`, and `getintegrity`.
+
+## Output
+
+```text
+uid=0(root) gid=0(root) euid=0(root) egid=0(root) groups=0(root)
+```

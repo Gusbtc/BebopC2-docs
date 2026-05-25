@@ -1,0 +1,20 @@
+---
+title: netloggedon
+description: Enumerate logged-on users through a built-in BOF.
+---
+
+# netloggedon
+
+## Usage
+
+```text
+[BEBOP ~]$ netloggedon [host]
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. The teamserver resolves `netloggedon.x64.o`, packs one optional wide-string host plus an integer flag currently set to `0`, and queues `TaskBOF`.
+
+## Output
+
+Output depends on remote access and token rights. Errors are returned by the BOF as text.

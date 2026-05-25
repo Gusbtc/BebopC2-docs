@@ -1,0 +1,20 @@
+---
+title: sql-agentstatus
+description: Query SQL Agent state and jobs through a built-in BOF.
+---
+
+# sql-agentstatus
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-agentstatus <server> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-agentstatus.x64.o` and packs up to four string arguments.
+
+## Output
+
+The BOF prints SQL Agent status and job data visible to the current context.

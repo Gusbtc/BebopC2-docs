@@ -1,0 +1,20 @@
+---
+title: priv-modifiable-autorun
+description: Find writable autorun executables through a built-in BOF.
+---
+
+# priv-modifiable-autorun
+
+## Usage
+
+```text
+[BEBOP ~]$ priv-modifiable-autorun
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `priv-modifiable-autorun.x64.o`, accepts no arguments, and queues `TaskBOF`.
+
+## Output
+
+The BOF returns autorun findings or its own status text.

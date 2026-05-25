@@ -1,0 +1,32 @@
+---
+title: curl
+description: Linux HTTP GET helper.
+---
+
+# curl
+
+## Usage
+
+```text
+[BEBOP ~]$ curl <url>
+```
+
+## How it works
+
+Linux implements a small HTTP client in `beacon-linux/src/exec/builtin.c`. It supports plain `http://` GET requests, opens a TCP socket, sends the request, and returns the response body/header data produced by the helper.
+
+HTTPS is not implemented in this built-in.
+
+## Output
+
+```text
+[BEBOP ~]$ curl http://127.0.0.1:8000/ping
+HTTP/1.1 200 OK
+...
+```
+
+Unsupported HTTPS:
+
+```text
+curl: https not supported in builtin, use download
+```

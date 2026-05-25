@@ -1,0 +1,34 @@
+---
+title: ls
+description: List directory entries.
+---
+
+# ls
+
+## Usage
+
+```text
+[BEBOP ~]$ ls [path]
+[BEBOP ~]$ dir [path]
+```
+
+## How it works
+
+Windows expands a wildcard pattern and enumerates with `FindFirstFileW` / `FindNextFileW`. Linux uses `opendir`, `lstat`, owner/group lookup, and `readlink` for symlinks.
+
+## Output
+
+Windows output is compact and does not include size or timestamps:
+
+```text
+<DIR>  Documents
+       readme.txt
+```
+
+Error shape:
+
+```text
+ls: cannot access 'C:\Nope\*' (error 3)
+```
+
+Linux `ls` uses Linux file metadata formatting from `beacon-linux/src/exec/builtin.c`.

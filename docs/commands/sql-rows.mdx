@@ -1,0 +1,20 @@
+---
+title: sql-rows
+description: Count SQL table rows through a built-in BOF.
+---
+
+# sql-rows
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-rows <server> <table> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-rows.x64.o` and packs server, database, table, linked server, and impersonation strings.
+
+## Output
+
+The BOF prints row count data returned by SQL Server.

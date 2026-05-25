@@ -1,0 +1,32 @@
+---
+title: dns
+description: Resolve an A record on Windows.
+---
+
+# dns
+
+## Usage
+
+```text
+[BEBOP ~]$ dns <name>
+```
+
+## How it works
+
+Windows calls `DnsQuery_A` for `DNS_TYPE_A` records and frees the record list with `DnsRecordListFree`.
+
+## Output
+
+```text
+  A    10.10.11.174
+```
+
+Errors:
+
+```text
+dns: missing name
+dns: query failed (error 9003)
+dns: no A records
+```
+
+Windows-only native command.

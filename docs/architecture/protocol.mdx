@@ -1,0 +1,104 @@
+---
+title: Protocol
+description: Binary task protocol and encrypted wire format.
+---
+
+# Protocol
+
+BebopC2 uses a compact binary protocol over HTTP for beacon traffic. The task layer follows the [OST C2 Spec](https://github.com/rasta-mouse/OST-C2-Spec), an open C&C messaging specification that defines typed task messages, structured output, correlation fields, and fragmentation semantics.
+
+The implementation is aligned with the spec's task-message model rather than a byte-for-byte clone of every optional feature. BebopC2 keeps the 16-byte task header shape and maps the current beacon capabilities onto its task types and result flags.
+
+## Task header
+
+Every task begins with a 16-byte little-endian header based on the OST C2 task header:
+
+| Offset | Field | Type | Description |
+| --- | --- | --- | --- |
+| `0` | Type | `uint8` | Task type |
+| `1` | Code | `uint8` | Task subtype |
+| `2:4` | Flags | `uint16` | Result flags |
+| `4:8` | Label | `uint32` | Correlates request and response |
+| `8:12` | Identifier | `uint32` | Fragment ordering or task-specific identifier |
+| `12:16` | Length | `uint32` | Payload length |
+
+These fields are used the same way throughout task requests and task responses: `Type` and `Code` identify behavior, `Flags` describe result state, `Label` correlates messages belonging to the same task, `Identifier` supports ordering or fragmentation, and `Length` bounds the payload.
+
+## Common task types
+
+| Type | Name | Purpose |
+| --- | --- | --- |
+| `0` | NOP | No-op |
+| `1` | Exit | Stop beacon |
+| `2` | Set | Update beacon setting such as sleep |
+| `3` | FileStage | Stage file download to beacon |
+| `4` | FileExfil | Upload file from beacon |
+| `12` | Run | Execute command |
+| `14` | ExecAssembly | Fork-and-run .NET assembly path |
+| `15` | InlineAssembly | Legacy structured inline result type retained by serializers |
+| `16` | BOF | Windows x64 COFF object execution |
+| `20` | Interactive | Upgrade beacon to session mode |
+| `21` | ShellStart | Start dedicated shell channel |
+| `22` | ShellInput | Send shell stdin |
+| `23` | ShellOutput | Return shell stdout/stderr |
+| `24` | ShellStop | Stop shell channel |
+| `25` | SocksOpen | Open SOCKS channel |
+| `26` | SocksData | Relay SOCKS payload |
+| `27` | SocksClose | Close SOCKS channel |
+| `28` | SocksAck | Acknowledge SOCKS open |
+| `29` | SocksStart | Start beacon SOCKS connection |
+| `30` | SocksStop | Stop beacon SOCKS connection |
+
+## Encrypted wire format
+
+After registration, messages use an encrypt-then-MAC envelope:
+
+```text
+[0:16]   IV
+[16:48]  HMAC-SHA256 over IV + ciphertext
+[48:]    AES-CBC ciphertext
+```
+
+Subkeys are derived from the beacon session key with direct `HMAC-SHA256(master, label)`. The labels are `aes-cbc` and `hmac-sha256`.
+
+## Payload formats
+
+| Payload | Format |
+| --- | --- |
+| Run request/reply | `uint32_le length` plus UTF-8 bytes |
+| Set sleep | `uint32_le interval_seconds` plus `uint32_le jitter_percent` |
+| Interactive request | `uint32_le host_length`, host bytes, `uint16_le port` |
+| Shell input | `uint32_le length` plus raw bytes |
+| Exec assembly | `uint32_le shellcode_length`, shellcode bytes, `uint32_le spawnto_length`, spawnto bytes |
+| BOF | `uint32_le object_length`, COFF bytes, `uint32_le args_length`, packed args |
+| Inline assembly via BOF | BOF args: `uint32_le bridge_length`, bridge bytes, `uint32_le assembly_length`, assembly bytes, `uint32_le argc`, repeated `uint32_le arg_length`, arg bytes |
+| File stage fragment 0 | `uint16_le path_length`, path bytes, chunk bytes |
+| File exfil fragment 0 | `uint16_le filename_length`, filename bytes, chunk bytes |
+
+## Registration
+
+Beacon registration uses RSA-OAEP to protect the initial session key and metadata. After registration, the beacon and teamserver use the symmetric session key for task and result traffic.
+
+## Result flags
+
+| Flag | Meaning |
+| --- | --- |
+| `0` | Success |
+| `1` | Error |
+| `2` | Running |
+| `4` | Fragmented |
+| `8` | Last fragment |
+
+Fragmentation and correlation behavior follow the OST C2 model: large output can be split into ordered fragments while preserving the label that ties those fragments back to the original task.
+
+## Implementation files
+
+| Path | Purpose |
+| --- | --- |
+| `teamserver/protocol/` | Go serializers, crypto, task headers |
+| `beacon/src/protocol/` | Windows beacon protocol and crypto |
+| `beacon-linux/src/protocol/` | Linux beacon protocol and crypto |
+
+## v1.5 inline-assembly note
+
+The active `inline-assembly` HTTP handler queues `TaskBOF` (`16`), not `TaskInlineAssembly` (`15`). The BOF loader formats the output as text beginning with `[inline-assembly]`. The structured `TaskInlineAssembly` serializer remains in the protocol package for compatibility with earlier experiments and tests.

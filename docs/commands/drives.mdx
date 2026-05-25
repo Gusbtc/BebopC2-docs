@@ -1,0 +1,25 @@
+---
+title: drives
+description: List Windows logical drives.
+---
+
+# drives
+
+## Usage
+
+```text
+[BEBOP ~]$ drives
+```
+
+## How it works
+
+Windows enumerates roots with `GetLogicalDriveStringsA`, maps each type with `GetDriveTypeA`, and adds size/free-space data from `GetDiskFreeSpaceExA` when available.
+
+## Output
+
+```text
+C:\  Fixed       59 GB total / 18 GB free
+D:\  CD-ROM
+```
+
+Drive type names come from `GetDriveTypeA`.

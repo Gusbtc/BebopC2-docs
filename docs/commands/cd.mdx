@@ -1,0 +1,31 @@
+---
+title: cd
+description: Change current working directory.
+---
+
+# cd
+
+## Usage
+
+```text
+[BEBOP ~]$ cd <path>
+```
+
+## How it works
+
+Windows calls `SetCurrentDirectoryA` and then prints `GetCurrentDirectoryA`. Linux calls `chdir`; with no argument it falls back to `$HOME`, then `/`.
+
+## Output
+
+```text
+[BEBOP ~]$ cd C:\Windows\Temp
+C:\Windows\Temp
+```
+
+Without an argument, Windows prints the current directory.
+
+Error shape:
+
+```text
+cd: cannot change to 'C:\Nope' (error 3)
+```

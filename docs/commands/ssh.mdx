@@ -1,0 +1,23 @@
+---
+title: ssh
+description: Linux remote SSH command helper.
+---
+
+# ssh
+
+## Usage
+
+```text
+[BEBOP ~]$ ssh <user@host> <cmd>
+```
+
+## How it works
+
+Linux implements this in `beacon-linux/src/exec/builtin.c` by spawning the target host's `ssh` client with `execvp()`, capturing stdout/stderr through a pipe, and returning up to the beacon output buffer. It adds non-interactive options such as batch mode and a connection timeout. Behavior depends on the `ssh` binary and credentials available on the target.
+
+## Output
+
+```text
+[BEBOP ~]$ ssh user@10.10.11.20 id
+uid=1000(user) gid=1000(user) groups=1000(user)
+```

@@ -1,0 +1,24 @@
+---
+title: portscan
+description: Linux TCP connect scan helper.
+---
+
+# portscan
+
+## Usage
+
+```text
+[BEBOP ~]$ portscan <host|cidr> <ports>
+```
+
+## How it works
+
+Linux parses a target host or CIDR and a comma/range port list in `beacon-linux/src/exec/builtin.c`. It uses non-blocking TCP connect attempts and reports ports that complete successfully.
+
+## Output
+
+```text
+[BEBOP ~]$ portscan 10.10.11.1 22,80,443
+10.10.11.1       22/tcp    open
+Scan complete: 1 open port(s) (1 host(s) scanned)
+```

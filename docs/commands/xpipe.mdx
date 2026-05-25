@@ -1,0 +1,29 @@
+---
+title: xpipe
+description: Enumerate named pipes through a built-in BOF.
+---
+
+# xpipe
+
+## Usage
+
+```text
+[BEBOP ~]$ xpipe [\\.\pipe\name]
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. With no argument, the teamserver packs the default string `L`; with one argument, it packs the supplied pipe string. The beacon's BOF loader executes `xpipe.x64.o` and returns the BOF output.
+
+## Output
+
+```text
+[BEBOP ~]$ xpipe
+[*] bof queued (label: 3777029912, object: 5283 bytes)
+```
+
+If the object references an API not supported by the loader compatibility layer, the result is explicit:
+
+```text
+bof: unresolved symbol: ...
+```

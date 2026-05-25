@@ -1,0 +1,20 @@
+---
+title: sql-databases
+description: Enumerate SQL databases through a built-in BOF.
+---
+
+# sql-databases
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-databases <server> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-databases.x64.o` and packs up to four string arguments.
+
+## Output
+
+The BOF prints database names reachable through the current SQL context.

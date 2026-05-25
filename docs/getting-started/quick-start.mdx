@@ -1,0 +1,62 @@
+---
+title: Quick Start
+description: Start the teamserver and operator client.
+---
+
+# Quick Start
+
+This guide covers teamserver and operator-client startup. The teamserver owns all state and tasking. The operator client is a small Go web server that serves the browser UI.
+
+:::info Automated Startup
+The provided setup scripts automatically build the binaries and **immediately start the services** on their default ports.
+:::
+
+---
+
+## 1. Teamserver Setup
+
+The teamserver is the central authority. It manages listeners, coordinates beacons, and stores all operational data.
+
+### Initialization & Execution
+Run the setup script on the teamserver host. It installs dependencies when possible, builds release resources, builds the server, verifies the Windows beacon build, creates `~/.bebop/mcp.token` when missing, and starts the teamserver on port `8080`.
+
+```bash
+chmod +x setup-teamserver.sh
+./setup-teamserver.sh
+```
+
+| Component | Default Endpoint |
+| --- | --- |
+| **Management API** | `http://<TEAMSERVER_IP>:8080/api/*` |
+| **Beacon API** | Listener-specific routing for beacons. |
+
+---
+
+## 2. Operator Client Setup
+
+The operator client provides the browser interface for interacting with the teamserver.
+
+### Initialization & Execution
+Run the setup script. It builds the client and starts it on port `9090`.
+
+```bash
+chmod +x setup-operator.sh
+./setup-operator.sh
+```
+
+### Accessing the Console
+1. Open **`http://localhost:9090`**.
+2. On the login page, set the teamserver host and port.
+3. Log in with the operator account created by the teamserver's first-operator setup.
+
+---
+
+## 3. Operational Workflow
+
+1. **Listeners:** Create or confirm an HTTP/HTTPS listener.
+2. **Build:** Generate a Windows or Linux beacon for that listener.
+3. **Callback:** Run the beacon in an authorized lab. Successful registration appears in Sessions.
+
+## Stopping the Services
+
+Use `Ctrl+C` in the respective terminals to stop the processes. Teamserver state is saved under `~/.bebop/`.

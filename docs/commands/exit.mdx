@@ -1,0 +1,26 @@
+---
+title: exit
+description: Ask beacon to terminate.
+---
+
+# exit
+
+## Usage
+
+```text
+[BEBOP ~]$ exit
+```
+
+## How it works
+
+The operator queues `TaskExit`. Windows beacon exits without extra success text after receiving the task; the teamserver removes or marks the session according to task delivery/dead-session state.
+
+## Output
+
+The UI queues an exit task. The teamserver removes the session after task delivery or dead-session delete.
+
+Windows beacon does not print cleanup narration. Linux sends:
+
+```text
+exiting
+```

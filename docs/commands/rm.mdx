@@ -1,0 +1,31 @@
+---
+title: rm
+description: Delete a file or Linux directory tree.
+---
+
+# rm
+
+## Usage
+
+```text
+[BEBOP ~]$ rm <file>
+[BEBOP ~]$ rm [-r|-rf] <path>   # Linux
+```
+
+## How it works
+
+Windows calls `DeleteFileA`, so it removes files only. Linux uses `unlink` for files and supports recursive removal through the Linux built-in path.
+
+## Output
+
+Windows success is silent. Windows error shape:
+
+```text
+rm: failed (error 5)
+```
+
+Linux success:
+
+```text
+removed: /tmp/file.txt
+```

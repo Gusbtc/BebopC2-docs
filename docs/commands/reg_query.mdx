@@ -1,0 +1,38 @@
+---
+title: reg_query
+description: Read a Windows registry value.
+---
+
+# reg_query
+
+## Usage
+
+```text
+[BEBOP ~]$ reg_query <HKLM\path|HKCU\path|HKCR\path|HKU\path> <value>
+```
+
+## How it works
+
+Windows parses supported hive prefixes, opens the key with `RegOpenKeyExA(KEY_READ)`, and reads the value with `RegQueryValueExA`. `REG_SZ`, `REG_EXPAND_SZ`, `REG_DWORD`, and raw hex output are formatted in the beacon.
+
+## Output
+
+String value:
+
+```text
+Microsoft Windows Server 2022 Standard
+```
+
+DWORD value:
+
+```text
+0x00000001 (1)
+```
+
+Errors:
+
+```text
+reg_query: unknown hive
+reg_query: cannot open key (error 2)
+reg_query: value not found (error 2)
+```

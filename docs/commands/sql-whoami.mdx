@@ -1,0 +1,20 @@
+---
+title: sql-whoami
+description: Show SQL login, mapped user, and roles through a built-in BOF.
+---
+
+# sql-whoami
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-whoami <server> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-whoami.x64.o` and packs up to four string arguments.
+
+## Output
+
+The BOF prints the SQL identity data it receives from the target SQL Server.

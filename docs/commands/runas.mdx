@@ -1,0 +1,30 @@
+---
+title: runas
+description: Run a Windows process with supplied credentials.
+---
+
+# runas
+
+## Usage
+
+```text
+[BEBOP ~]$ runas <username> <password> <command>
+```
+
+## How it works
+
+Windows converts arguments to UTF-16 and calls `CreateProcessWithLogonW` with `LOGON_WITH_PROFILE` and `CREATE_NO_WINDOW`. The beacon waits up to 30 seconds and reports PID plus exit code.
+
+## Output
+
+```text
+pid=4984 exit=0
+```
+
+Failure:
+
+```text
+runas: failed (error 1326)
+```
+
+This starts a new process using `CreateProcessWithLogonW`.

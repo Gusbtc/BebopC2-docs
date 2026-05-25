@@ -1,0 +1,29 @@
+---
+title: stat
+description: Return file or directory metadata.
+---
+
+# stat
+
+## Usage
+
+```text
+[BEBOP ~]$ stat <path>
+```
+
+## How it works
+
+Windows calls `GetFileAttributesExA`, builds the 64-bit size from the returned high/low fields, and converts FILETIME values through `FileTimeToSystemTime`.
+
+## Output
+
+```text
+Path:     C:\Windows\win.ini
+Type:     File
+Size:     92 bytes
+Created:  2024-01-01 10:00:00 UTC
+Modified: 2024-01-01 10:00:00 UTC
+Accessed: 2024-01-01 10:00:00 UTC
+```
+
+Windows-only native command.

@@ -1,0 +1,75 @@
+---
+title: Protocol tasks
+description: How BebopC2 task types are represented and extended.
+---
+
+# Protocol tasks
+
+Tasks are queued by the teamserver, fetched by the beacon during check-in, executed locally, and returned as encrypted results.
+
+The task model follows the [OST C2 Spec](https://github.com/rasta-mouse/OST-C2-Spec). Keep new work compatible with that design: typed task messages, a 16-byte header, label-based correlation, identifier-based ordering, explicit flags, and bounded payload lengths.
+
+## Current task types
+
+| Type | Name | Purpose |
+| --- | --- | --- |
+| `0` | NOP | Keepalive or no-operation task. |
+| `1` | Exit | Ask a beacon to terminate. |
+| `2` | Set | Update beacon runtime settings. |
+| `3` | FileStage | Stage a file for download by the beacon. |
+| `4` | FileExfil | Upload a file from the beacon to the teamserver. |
+| `12` | Run | Execute a command or higher-level action. |
+| `14` | ExecAssembly | Queue fork-and-run .NET assembly execution. |
+| `15` | InlineAssembly | Legacy structured inline result path retained in serializers. |
+| `16` | BOF | Queue Windows x64 COFF object execution. |
+| `20` | Interactive | Ask a beacon to open persistent session mode. |
+| `21` | ShellStart | Start a dedicated shell channel. |
+| `22` | ShellInput | Send shell input. |
+| `23` | ShellOutput | Return shell output. |
+| `24` | ShellStop | Stop shell channel. |
+| `25` | SocksOpen | Open a SOCKS channel to a target. |
+| `26` | SocksData | Relay channel bytes. |
+| `27` | SocksClose | Close a SOCKS channel. |
+| `28` | SocksAck | Acknowledge SOCKS channel open. |
+| `29` | SocksStart | Start beacon SOCKS relay connection. |
+| `30` | SocksStop | Stop beacon SOCKS relay connection. |
+
+Higher-level actions are transported through the same task envelope and interpreted by the beacon execution layer. Session-mode tasks can be sent over TCP immediately, while HTTP-mode tasks are drained on check-in.
+
+In v1.5.0, `inline-assembly` is packed into a `TaskBOF` task. The native inline loader BOF hosts CLR and emits text output. Do not use `TaskInlineAssembly` for new operator tasking unless the beacon-side structured path is reintroduced.
+
+## Queue behavior
+
+Tasks are stored in SQLite with `PENDING`, `SENT`, and `COMPLETED` statuses. HTTP check-in drains up to `32` pending tasks for a beacon. Session-mode dispatch marks sent tasks immediately when the TCP write succeeds, but still records the row for result correlation and history.
+
+## Adding a task
+
+Use a new task type only when the existing `Run` command model cannot express the behavior cleanly.
+
+Implementation checklist:
+
+1. Check whether the behavior already maps to an OST C2 task type and code.
+2. Define the task constant in the shared model/protocol layer.
+3. Add serializer and parser coverage.
+4. Add queueing support in the teamserver handler.
+5. Add beacon-side dispatch logic.
+6. Add result formatting and error behavior.
+7. Add operator UI support.
+8. Document usage, limits, and failure modes.
+
+## Payload limits
+
+Keep task payloads bounded. Large files should use the chunked transfer path instead of a single task body. For upload endpoints, use explicit request size limits so an operator mistake cannot consume unbounded memory.
+
+## Result behavior
+
+Results should be explicit enough for the operator to understand:
+
+- command accepted
+- command failed before execution
+- command executed and returned output
+- command timed out
+- unsupported platform or mode
+- output truncated or chunked
+
+Ambiguous success messages make remote troubleshooting expensive.

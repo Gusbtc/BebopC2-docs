@@ -1,0 +1,20 @@
+---
+title: local-sessions
+description: Enumerate local or RDP sessions through a built-in BOF.
+---
+
+# local-sessions
+
+## Usage
+
+```text
+[BEBOP ~]$ local-sessions
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. It accepts no arguments. The teamserver queues `local-sessions.x64.o` as `TaskBOF`, and the beacon executes it with the in-process COFF loader.
+
+## Output
+
+Session output comes directly from the BOF.

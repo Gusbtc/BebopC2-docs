@@ -1,0 +1,60 @@
+---
+title: Persistence
+description: Teamserver runtime state and persistence model.
+---
+
+# Persistence
+
+BebopC2 keeps its operational data organized by splitting state between a SQLite database and a collection of JSON files. This approach ensures that performance-heavy data, like thousands of task results, is handled by a real database, while configuration remains human-readable.
+
+## Where things live
+
+Persistent teamserver data is stored under `~/.bebop/`. Exfiltrated file bytes default to `~/.bebop/exfil/`; legacy `./exfil/` paths are still checked when downloading or deleting old loot entries.
+
+| Data Type | Location | Purpose |
+| :--- | :--- | :--- |
+| **Operational History** | `byps.db` (SQLite) | Stores tasks, results, and chat history. |
+| **User Identity** | `operators.db` (SQLite) | Stores operator accounts and hashed passwords. |
+| **Infrastructure** | `listeners.json` | Tracks configured HTTP/HTTPS and session listeners. |
+| **Session Metadata** | `beacons.json` | Stores metadata for all registered beacons. |
+| **Operational Log** | `events.json` | A chronological log of all server and operator actions. |
+| **Terminal State** | `terminals.json` | Preserves the state of operator terminals across sessions. |
+| **Security Identity** | `rsa.pem` | The private key used to decrypt beacon registration metadata. |
+| **JWT Key** | `jwt.key` | HS256 key for operator JWT signing. |
+| **MCP Token** | `mcp.token` | Bearer token for HTTP MCP clients. |
+| **Operator BOFs** | `bofs/` | Uploaded operator `.o` and `.obj` files. |
+| **Assemblies** | `assemblies/` | Uploaded operator `.exe` assemblies. |
+| **Loot** | `exfil/` | Downloaded files from target systems. |
+
+## SQLite Schema
+
+The `byps.db` database is the heart of the persistence model, utilizing WAL (Write-Ahead Logging) mode for performance and reliability. It contains three primary tables:
+
+*   **`tasks`**: Tracks every command issued to a beacon, including its status (`PENDING`, `SENT`, or `COMPLETED`).
+*   **`results`**: Stores the output of completed tasks, including structured fields for `.NET` and BOF execution results.
+*   **`chat_messages`**: Preserves the collaborative history of the operator chat.
+
+## Starting Fresh
+
+BebopC2 provides built-in mechanisms to reset your operational environment without manually hunting down files.
+
+### The Startup Reset Menu
+If the teamserver detects an existing session upon startup, it will present a menu with several options:
+
+*   **`L` (Load)**: Resume the previous session with all data intact.
+*   **`R` (Reset)**: Performs a "soft" reset. You will be prompted to type `reset` to confirm.
+    *   **What happens:** Deletes files under `~/.bebop/`, clears chat history from SQLite, removes `~/.bebop/exfil/`, and removes legacy `./exfil/`.
+    *   **What changes:** A fresh RSA key and JWT key are generated after reset, and first-operator setup runs again if no operator account remains.
+
+### The "Nuclear" Option
+If you need to completely wipe the entire teamserver identity—including all operators and cryptographic keys—simply move or delete the configuration directory:
+
+```bash
+mv ~/.bebop ~/.bebop.backup
+```
+
+Restarting the server after this will trigger the "first operator setup" and generate a brand new RSA identity.
+
+:::warning OPSEC Note
+The `~/.bebop/` directory contains the complete forensic trail of your operation. Treat it as highly sensitive data. In a production environment, it is recommended to store this directory on an encrypted volume and securely wipe it once the engagement and reporting phases are complete.
+:::

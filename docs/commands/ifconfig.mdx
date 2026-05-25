@@ -1,0 +1,28 @@
+---
+title: ifconfig
+description: Linux alias for ipconfig.
+---
+
+# ifconfig
+
+## Usage
+
+```text
+[BEBOP ~]$ ifconfig
+```
+
+## How it works
+
+Linux handles `ifconfig` as an alias of `ipconfig`. The beacon calls `getifaddrs()` and prints interface flags plus IPv4, IPv6, and MAC data when present.
+
+Windows uses `ipconfig`.
+
+## Output
+
+```text
+eth0
+  flags: UP RUNNING
+  inet  10.10.11.20/24
+  inet6 fe80::aaaa:bbbb:cccc:dddd
+  ether 00:50:56:b0:aa:bb
+```

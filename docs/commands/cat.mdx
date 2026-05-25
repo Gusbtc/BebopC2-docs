@@ -1,0 +1,31 @@
+---
+title: cat
+description: Read a small text file.
+---
+
+# cat
+
+## Usage
+
+```text
+[BEBOP ~]$ cat <file>
+```
+
+## How it works
+
+Windows converts the path to UTF-16, opens it with `CreateFileW`, and reads with `ReadFile`. Linux uses `open` and `read`; the built-in caps reads at 1 MiB.
+
+## Output
+
+```text
+[fonts]
+[extensions]
+```
+
+Error shape:
+
+```text
+cat: cannot open 'C:\Nope.txt' (error 2)
+```
+
+Linux caps `cat` at 1 MiB and returns `cat: file too large (max 1MB)` when exceeded.

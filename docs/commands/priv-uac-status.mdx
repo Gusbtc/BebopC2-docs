@@ -1,0 +1,20 @@
+---
+title: priv-uac-status
+description: Print UAC and integrity status through a built-in BOF.
+---
+
+# priv-uac-status
+
+## Usage
+
+```text
+[BEBOP ~]$ priv-uac-status
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `priv-uac-status.x64.o`, accepts no arguments, and queues `TaskBOF`.
+
+## Output
+
+The BOF prints UAC and integrity-related status for the current context.

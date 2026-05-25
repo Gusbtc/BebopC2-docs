@@ -1,0 +1,37 @@
+---
+title: Loot and Events
+description: Review collected files and operational history.
+---
+
+# Loot and Events
+
+Loot and events provide the operator record: what was collected, when tasks were queued, which sessions changed state, and which operator performed sensitive actions.
+
+## Loot
+
+Loot entries track uploaded files and metadata. Use the Loot page to download or delete collected files.
+
+Recommended operator habit:
+
+- Rename local copies with beacon ID and timestamp.
+- Keep hashes when producing engagement evidence.
+- Delete stale lab artifacts from the teamserver after testing.
+
+## Events
+
+Events are timestamped operational messages.
+
+Common event types:
+
+- Beacon registration
+- Listener lifecycle
+- Task queueing
+- Assembly uploads
+- Inline assembly queueing
+- SOCKS5 lifecycle
+- Operator chat activity
+- Auth events
+
+## Reporting
+
+The current UI gives raw operational history. A future reporting layer should export sessions, events, commands, results, and loot metadata into HTML or Markdown.

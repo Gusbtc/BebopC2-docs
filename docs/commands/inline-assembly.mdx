@@ -1,0 +1,34 @@
+---
+title: inline-assembly
+description: Run .NET assembly in-process through BOF loader and managed bridge.
+---
+
+# inline-assembly
+
+## Usage
+
+```text
+[BEBOP ~]$ inline-assembly [--mode auto|bridge] [assembly] [args]
+```
+
+No assembly opens a local file picker. A name loads from `~/.bebop/assemblies/`.
+
+## How it works
+
+The teamserver loads `Runtime.Loader.dll` and `InlineAssembly.Loader.x64.obj`, packs bridge bytes, assembly bytes, and arguments, then queues a `TaskBOF`. The beacon runs the loader through the COFF loader; the managed bridge captures stdout/stderr and returns the formatted inline result.
+
+## Output
+
+```text
+[*] inline-assembly queued (label: 4176515639)
+[+] task delivered to beacon
+[inline-assembly]
+Exit: 0
+Duration: 63ms
+Truncated: false
+
+STDOUT:
+[+] execute-assembly is working
+```
+
+`direct` mode is rejected in v1.5.0. `auto` and `bridge` use the bridge path.

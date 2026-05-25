@@ -1,0 +1,24 @@
+---
+title: pwd
+description: Print current working directory.
+---
+
+# pwd
+
+## Usage
+
+```text
+[BEBOP ~]$ pwd
+```
+
+## How it works
+
+Windows uses dynamically resolved `GetCurrentDirectoryA`. Linux uses `getcwd`.
+
+## Output
+
+```text
+C:\Users\Administrator\Documents
+```
+
+Linux returns the absolute current directory path.

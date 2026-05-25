@@ -1,0 +1,28 @@
+---
+title: assembly-delete
+description: Delete an uploaded .NET assembly.
+---
+
+# assembly-delete
+
+## Usage
+
+```text
+[BEBOP ~]$ assembly-delete <name>
+```
+
+## How it works
+
+The operator sends `DELETE /api/assemblies/{name}`. The teamserver validates the safe filename, removes it from the assembly library, publishes a delete update, and logs the operation.
+
+## Output
+
+```text
+[+] assembly "Rubeus.exe" deleted
+```
+
+Failure:
+
+```text
+[error] delete failed: 404
+```

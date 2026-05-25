@@ -1,0 +1,42 @@
+---
+title: Release process
+description: Release checklist for BebopC2.
+---
+
+# Release process
+
+Version `1.5.0` is the active development target.
+
+## Before release
+
+1. Review the changelog and confirm all listed features are implemented.
+2. Build the teamserver, operator client, and beacon.
+3. Verify generated beacon headers are current.
+4. Check beacon strings for accidental plaintext additions.
+5. Confirm `teamserver/version/version.go` contains the release version.
+6. Confirm the release lookup URL points to the `Gusbtc/BebopC2` repository.
+7. Run a local registration and check-in test.
+8. Validate at least one command result, one file transfer path, and one listener lifecycle.
+
+## Tagging
+
+Use a semantic version tag:
+
+```bash
+git tag
+git push origin
+```
+
+## GitHub release
+
+The release notes should include:
+
+- highlights
+- breaking changes, if any
+- upgrade notes
+- known issues
+- checks performed before publishing
+
+## After release
+
+Start the next development cycle by updating planning notes and opening issues for any deferred hardening items. Do not mix post-release planning into the release tag.

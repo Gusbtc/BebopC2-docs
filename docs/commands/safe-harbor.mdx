@@ -1,0 +1,20 @@
+---
+title: safe-harbor
+description: Process reconnaissance through a built-in BOF.
+---
+
+# safe-harbor
+
+## Usage
+
+```text
+[BEBOP ~]$ safe-harbor
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. The teamserver resolves `safe-harbor.x64.o`, accepts no arguments, queues `TaskBOF`, and the beacon executes the object in-process.
+
+## Output
+
+The BOF prints process reconnaissance data directly. Argument parsing is strict; any argument is rejected before tasking.

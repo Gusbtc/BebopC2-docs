@@ -1,0 +1,20 @@
+---
+title: sql-impersonate
+description: Check SQL impersonation rights through a built-in BOF.
+---
+
+# sql-impersonate
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-impersonate <server> [database]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-impersonate.x64.o` and packs one or two string arguments.
+
+## Output
+
+The BOF prints impersonation-related SQL rows or its own error text.

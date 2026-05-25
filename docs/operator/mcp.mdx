@@ -1,0 +1,178 @@
+---
+title: MCP
+description: HTTP MCP access for AI agents.
+---
+
+# MCP
+
+BebopC2 exposes MCP directly from the teamserver over Streamable HTTP:
+
+```text
+POST /api/mcp
+Authorization: Bearer <mcp-token>
+Content-Type: application/json
+```
+
+The agent host only needs network access to the teamserver MCP endpoint and the token shown in the operator UI.
+
+## Operator panel
+
+Open the MCP tab in the operator UI. It shows:
+
+| Field | Meaning |
+| --- | --- |
+| `mode` | Always `http`. |
+| `endpoint` | Full MCP HTTP URL, usually `http://<teamserver>:8080/api/mcp`. |
+| `token` | Masked by default; click reveal to copy it. |
+| `mutation` | Whether mutating MCP tools are enabled on the teamserver. |
+
+The copy prompt uses endpoint and header values only. It does not depend on a local environment variable, local binary, stdio server, or project checkout.
+
+Generic JSON shape:
+
+```json
+{
+  "mcpServers": {
+    "bebop": {
+      "type": "http",
+      "url": "http://<teamserver>:8080/api/mcp",
+      "headers": {
+        "Authorization": "Bearer <mcp-token>"
+      }
+    }
+  }
+}
+```
+
+Generic TOML shape:
+
+```toml
+[mcp_servers.bebop]
+url = "http://<teamserver>:8080/api/mcp"
+http_headers = { Authorization = "Bearer <mcp-token>" }
+```
+
+After configuration, verify the connection with `initialize`, `tools/list`, `resources/list`, and `bebop.sessions.list` before using mutating tools.
+
+## Tools
+
+Read-only tools expose sessions, task results, operator state, and module inventory:
+
+| Tool | Purpose |
+| --- | --- |
+| `bebop.sessions.list` | List beacon sessions. |
+| `bebop.session.get` | Read one beacon session. |
+| `bebop.results.list` | Read task results for a beacon. |
+| `bebop.task.get` | Read one task result by beacon ID and label. |
+| `bebop.task.wait` | Poll until one task result arrives. |
+| `bebop.events.list` | Read operator event log entries. |
+| `bebop.loot.list` | List exfiltrated loot metadata. |
+| `bebop.loot.get` | Read loot content as text or base64. |
+| `bebop.library.list` | List BOF and assembly library entries. |
+| `bebop.assembly.list` | List uploaded .NET assemblies. |
+| `bebop.listeners.list` | List listener definitions. |
+| `bebop.socks.list` | List SOCKS proxies. |
+| `bebop.terminal.get` | Read terminal and file-browser cache. |
+| `bebop.filebrowser.cache.get` | Read only the file-browser cache. |
+| `bebop.chat.list` | List operator chat messages. |
+| `bebop.commands.list` | List the command catalog. |
+| `bebop.command.describe` | Describe one command schema. |
+
+Mutating tools are exposed by default. To force read-only MCP access, start the teamserver with:
+
+```bash
+BEBOP_MCP_ALLOW_MUTATION=0
+```
+
+With that variable set to `0`, `false`, `no`, or `off`, `tools/list` hides mutating tools and `tools/call` returns `mutation disabled` for mutating tool names.
+
+| Tool | Purpose |
+| --- | --- |
+| `bebop.command.run` | Queue a command task. |
+| `bebop.command.execute` | Queue a command and wait for result. |
+| `bebop.identity.whoami` | Run `whoami` and wait for output. |
+| `bebop.fs.pwd` | Run `pwd` and wait for output. |
+| `bebop.fs.ls` | Run `ls [path]` and wait for output. |
+| `bebop.fs.cat` | Run `cat <path>` and wait for output. |
+| `bebop.fs.cd` | Run `cd <path>` and wait for output. |
+| `bebop.process.list` | Run `ps` and wait for output. |
+| `bebop.net.netstat` | Run `netstat` and wait for output. |
+| `bebop.domain.ldapsearch` | Run the built-in `ldapsearch` BOF and wait for output. |
+| `bebop.domain.adcs_enum` | Run the built-in `adcs_enum` BOF and wait for output. |
+| `bebop.bof.execute` | Execute a BOF from the library. |
+| `bebop.bof.execute.wait` | Execute a BOF and wait for result. |
+| `bebop.inline-assembly.execute` | Execute an inline assembly module. |
+| `bebop.inline-assembly.execute.wait` | Execute inline assembly and wait for result. |
+| `bebop.beacon.sleep` | Change sleep interval and jitter. |
+| `bebop.beacon.exit` | Task a beacon to exit. |
+| `bebop.beacon.interactive` | Start interactive session mode. |
+| `bebop.session.close` | Close active session mode without killing the beacon. |
+| `bebop.socks.start` | Start a SOCKS proxy after the beacon is in session mode. |
+| `bebop.socks.stop` | Stop a SOCKS proxy. |
+| `bebop.file.download` | Queue remote file exfiltration and optionally wait. |
+| `bebop.file.upload` | Stage base64 content to a remote path. |
+| `bebop.loot.delete` | Delete loot metadata and disk file. |
+| `bebop.library.upload` | Upload `.o`, `.obj`, or `.exe` into the operator library. |
+| `bebop.library.delete` | Delete an operator library file. |
+| `bebop.assembly.upload` | Upload a .NET assembly. |
+| `bebop.assembly.delete` | Delete an uploaded assembly. |
+| `bebop.listeners.create` | Create and start a listener. |
+| `bebop.listeners.delete` | Stop and delete a listener. |
+| `bebop.beacon.build` | Build a beacon artifact and return base64 content. |
+| `bebop.terminal.put` | Save terminal and file-browser cache. |
+| `bebop.filebrowser.list` | Run the filebrowser command, wait, parse entries, and cache them. |
+| `bebop.filebrowser.cache.set` | Save file-browser cache. |
+| `bebop.events.add` / `bebop.events.post` | Add event log entry. |
+| `bebop.chat.send` | Send operator chat message. |
+
+`bebop.command.run`, `bebop.bof.execute`, and `bebop.inline-assembly.execute` accept structured `args` arrays. The MCP endpoint quotes and packs those arguments before calling the existing teamserver API.
+
+## Schemas
+
+Tool inputs use JSON schemas with `additionalProperties: false`.
+
+| Field | Used by | Meaning |
+| --- | --- | --- |
+| `beacon_id` | Session, result, and mutating tools | Target beacon ID. |
+| `args` | Command, BOF, and inline assembly tools | Ordered argument array. Defaults to `[]`. |
+| `transport` | `bebop.command.run` | `auto`, `http`, or `session`; `auto` uses session transport. |
+| `mode` | `bebop.inline-assembly.execute` | `auto` or `bridge`; direct mode is disabled. |
+| `jitter` | `bebop.beacon.sleep` | `0` through `100`. |
+| `port` | `bebop.socks.start` | SOCKS port, or `0` for automatic selection. Requires `bebop.beacon.interactive` first. |
+| `confirm` | Destructive tools | Must be `true` for beacon exit, listener delete, library delete, assembly delete, and loot delete. |
+| `content_base64` | Upload/build-related tools | Base64 input or output for binary payloads. |
+
+## Resources
+
+MCP resources expose read-only data as JSON:
+
+| Resource | Purpose |
+| --- | --- |
+| `bebop://sessions` | All sessions. |
+| `bebop://sessions/{id}` | One session. |
+| `bebop://results/{id}` | Results for one beacon. |
+| `bebop://events` | Event log. |
+| `bebop://loot` | Loot metadata. |
+| `bebop://library` | Library entries. |
+| `bebop://assemblies` | Uploaded assemblies. |
+| `bebop://listeners` | Listener definitions. |
+| `bebop://socks` | SOCKS proxies. |
+| `bebop://terminal/{id}` | Saved terminal state. |
+| `bebop://filebrowser/{id}` | Saved file-browser cache. |
+| `bebop://filebrowser-session/{id}` | Saved session file-browser cache. |
+| `bebop://chat` | Operator chat history. |
+
+## Safety
+
+MCP uses bearer-token auth. The `/api/mcp` endpoint accepts normal operator JWTs and the configured MCP token.
+
+Mutating actions go through the existing teamserver routes, so they keep the same task validation and event logging behavior.
+
+The token file supports either a plain token, which keeps full compatibility, or a scoped format:
+
+```text
+token=<secret>
+scopes=read,task,file,library,listener,build,admin
+```
+
+Destructive tools require `confirm=true` in addition to the required scope.

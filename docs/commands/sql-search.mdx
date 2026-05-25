@@ -1,0 +1,20 @@
+---
+title: sql-search
+description: Search SQL column names through a built-in BOF.
+---
+
+# sql-search
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-search <server> <term> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-search.x64.o` and packs server, database, linked server, impersonation, and keyword strings in the order expected by the BOF.
+
+## Output
+
+The BOF prints matching SQL column names.

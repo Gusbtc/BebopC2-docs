@@ -1,0 +1,24 @@
+---
+title: getpid
+description: Return current beacon process ID.
+---
+
+# getpid
+
+## Usage
+
+```text
+[BEBOP ~]$ getpid
+```
+
+## How it works
+
+Windows returns the current beacon process ID from dynamically resolved `GetCurrentProcessId`. No child process is spawned.
+
+## Output
+
+```text
+3796
+```
+
+Windows-only native command.

@@ -1,0 +1,48 @@
+---
+title: Build errors
+description: Troubleshooting teamserver, operator, and beacon build failures.
+---
+
+# Build errors
+
+## Go module errors
+
+Run `go mod tidy` in the component that fails:
+
+```bash
+cd teamserver
+go mod tidy
+go test ./...
+```
+
+Repeat for `operator-client` if the operator build fails.
+
+## Missing MinGW or CMake
+
+Beacon builds require a Windows cross-compilation toolchain.
+
+On Debian or Kali-style systems:
+
+```bash
+sudo apt install mingw-w64 cmake nasm
+```
+
+Then rebuild:
+
+```bash
+cd beacon
+cmake -B build
+cmake --build build
+```
+
+## Generated beacon headers are stale
+
+If new obfuscated strings or API hashes were added, regenerate:
+
+```bash
+cd teamserver
+go run ./cmd/gen_obf -host 127.0.0.1 -out ../beacon/include
+go run ./cmd/gen_hashes -out ../beacon/include
+```
+
+Then rebuild the beacon.

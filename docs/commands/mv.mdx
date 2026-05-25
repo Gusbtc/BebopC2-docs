@@ -1,0 +1,30 @@
+---
+title: mv
+description: Move or rename a file.
+---
+
+# mv
+
+## Usage
+
+```text
+[BEBOP ~]$ mv <src> <dst>
+```
+
+## How it works
+
+Windows calls dynamically resolved `MoveFileA`. Linux tries `rename` first and falls back to copy/remove when needed.
+
+## Output
+
+Windows success is silent. Error shape:
+
+```text
+mv: failed (error 5)
+```
+
+Linux success:
+
+```text
+moved: /tmp/a -> /tmp/b
+```

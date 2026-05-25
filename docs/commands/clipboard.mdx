@@ -1,0 +1,32 @@
+---
+title: clipboard
+description: Read Windows clipboard text.
+---
+
+# clipboard
+
+## Usage
+
+```text
+[BEBOP ~]$ clipboard
+```
+
+## How it works
+
+Windows opens the clipboard with `OpenClipboard`, reads `CF_TEXT` with `GetClipboardData`, locks the global handle with `GlobalLock`, then closes the clipboard.
+
+## Output
+
+The command returns raw clipboard text:
+
+```text
+copied text value
+```
+
+Empty clipboard:
+
+```text
+(clipboard is empty)
+```
+
+Windows-only native command.

@@ -1,0 +1,69 @@
+---
+title: Configuration
+description: Runtime configuration, environment variables, ports, and deployment notes.
+---
+
+# Configuration
+
+BebopC2 uses simple command-line flags and local state files. Keep deployments boring: explicit ports, reachable listener hosts, TLS where operators cross a network boundary, and predictable backups.
+
+## Binaries
+
+```bash
+./bin/teamserver -port 8080
+./bin/operator-client -port 9090
+```
+
+## Recommended environment
+
+| Setting | Recommendation |
+| --- | --- |
+| Operator network | Bind management surfaces to localhost or a trusted VPN interface |
+| Listener network | Bind only the ports required for beacon callbacks |
+| TLS | Use HTTPS for management and listener surfaces when traffic leaves localhost |
+| Backups | Back up `~/.bebop/` before release testing |
+| Logs | Preserve teamserver stdout during testing and release validation |
+
+## CORS
+
+The teamserver CORS origin is controlled by `BEBOP_ALLOWED_ORIGINS`:
+
+```bash
+export BEBOP_ALLOWED_ORIGINS=http://localhost:9090
+```
+
+If unset, REST CORS accepts any origin. Operator WebSockets default to localhost origin patterns. Set this to the exact operator-client origin when the UI is served from a different host or port.
+
+## Ports
+
+| Port | Typical use |
+| --- | --- |
+| `8080` | Teamserver management API and beacon routes |
+| `9090` | Operator client web UI |
+| `1080-1099` | SOCKS5 proxy bind range |
+
+## Runtime state
+
+State lives in `~/.bebop/`. Treat it as sensitive. It can include beacon metadata, task history, results, chat messages, operator events, assemblies, operator BOFs, loot metadata, MCP token, JWT key, and RSA key material. Logout token revocation is memory-only and is not persisted across restart.
+
+## MCP
+
+The MCP bearer token enables access to the teamserver MCP HTTP endpoint at `/api/mcp`. `setup-teamserver.sh` creates it at `~/.bebop/mcp.token`. MCP clients should send it as `Authorization: Bearer <token>` on every request.
+
+MCP mutating tools are enabled by default. Set `BEBOP_MCP_ALLOW_MUTATION=0` to force read-only agent access.
+
+## Release version
+
+The active release version is defined in `teamserver/version/version.go`.
+
+## Environment variables
+
+| Variable | Effect |
+| --- | --- |
+| `BEBOP_ALLOWED_ORIGINS` | Comma-separated REST CORS and WebSocket origin allowlist. |
+| `BEBOP_WS_LEGACY_QUERY_TOKEN` | Allows legacy `?token=` WebSocket JWT auth when set to `1`, `true`, `yes`, or `on`. |
+| `BEBOP_MCP_TOKEN` | Overrides the MCP token read from `~/.bebop/mcp.token`. |
+| `BEBOP_MCP_ALLOW_MUTATION` | Set `0`, `false`, `no`, or `off` to expose MCP read-only tools only. |
+| `BEBOP_LOOT_DIR` | Overrides the default `~/.bebop/exfil` loot file directory. |
+| `BEBOP_LIBRARY_DIR` | Overrides the default `~/.bebop` library root for uploaded BOFs and assemblies. |
+| `BEBOP_BUILTIN_BOF_DIR` | Overrides the built-in BOF manifest directory. |

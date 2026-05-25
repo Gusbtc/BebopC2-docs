@@ -1,0 +1,20 @@
+---
+title: msi-search
+description: Search cached MSI installer metadata through a built-in BOF.
+---
+
+# msi-search
+
+## Usage
+
+```text
+[BEBOP ~]$ msi-search
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `msi-search.x64.o`, accepts no arguments, queues `TaskBOF`, and the beacon executes it in-process.
+
+## Output
+
+The BOF prints cached MSI metadata findings when present.

@@ -1,0 +1,88 @@
+---
+title: BOF Execution
+description: Running modular Beacon Object Files for situational awareness.
+---
+
+# BOF Execution
+
+Beacon Object Files are Windows x64 COFF objects executed inside the beacon process. Bebop's loader lives in `beacon/src/exec/bof.c`; the teamserver packs the object and argument buffer in `POST /api/bof`, then queues `TaskBOF` (`16`).
+
+This follows the same broad model used by mature C2s: the operator queues an object file, the agent links it in memory, and the output shown to the operator is the BOF's own output, not fake loader progress.
+
+## Flow
+
+```text
+operator command
+  -> POST /api/bof
+  -> teamserver resolves uploaded or built-in object
+  -> teamserver packs arguments
+  -> beacon maps COFF sections
+  -> beacon resolves Beacon API and DLL$Function symbols
+  -> beacon calls go(args, alen)
+  -> beacon returns captured output
+```
+
+## Commands
+
+```text
+bof-execute [args]                    Run selected .o/.obj from file picker
+bof-execute <name.o|name.obj> [args]  Run operator or built-in BOF by name
+bof-upload <name.o|name.obj>          Upload operator BOF to ~/.bebop/bofs/
+bof-list                              List operator and built-in BOFs
+```
+
+## Entry point
+
+The entry point signature is:
+
+```c
+void go(char *args, int alen);
+```
+
+For operator-uploaded BOFs, arguments are packed as repeated length-prefixed strings. Built-in BOFs use command-specific packers in `teamserver/server/handlers.go` so public tools that expect wide strings, integers, or fixed argument positions receive the right layout.
+
+## Output
+
+```text
+[BEBOP ~]$ bof-execute bebop_test_bof.obj adaw
+[*] bof queued (label: 132969452, object: 1194 bytes)
+[+] task delivered to beacon
+Bebop BOF smoke test OK
+Current PID: 3308
+First arg length: 4
+First arg: adaw
+```
+
+If a BOF prints nothing, the UI may show:
+
+```text
+[*] task completed (no output)
+```
+
+## Beacon API
+
+BebopC2 provides a compatibility layer for standard Beacon APIs, allowing you to use most public BOFs (e.g., from TrustedSec's collection) without modification.
+
+| API Function | Purpose |
+| :--- | :--- |
+| `BeaconPrintf` | Send formatted text back to the console. |
+| `BeaconOutput` | Send raw data back to the console. |
+| `BeaconDataParse` | Initialize the argument parser. |
+| `BeaconDataExtract` | Extract a string or byte array from arguments. |
+| `BeaconDataInt` | Extract an integer from arguments. |
+
+The loader also resolves symbols using the `LIBRARY$Function` convention. If a symbol is not available, the result includes the unresolved symbol name.
+
+## Built-in BOF library
+
+Built-ins are read-only files under `teamserver/resources/bofs/` and are listed by `teamserver/resources/bofs/manifest.json`. Operator uploads live under `~/.bebop/bofs/` and are deletable from the Library panel.
+
+Use `bof-list` to see both sources.
+
+## Limits
+
+- Windows x64 beacons only.
+- Object file must be x64 COFF.
+- A BOF runs in the beacon thread; long-running or blocking BOFs delay other work.
+- No libc is linked automatically. Use Beacon APIs, your own helpers, or `DLL$Function` imports.
+- A crashing BOF can crash the beacon process.

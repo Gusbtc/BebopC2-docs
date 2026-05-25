@@ -1,0 +1,20 @@
+---
+title: priv-hijackable-path
+description: Find writable PATH directories through a built-in BOF.
+---
+
+# priv-hijackable-path
+
+## Usage
+
+```text
+[BEBOP ~]$ priv-hijackable-path
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `priv-hijackable-path.x64.o`, accepts no arguments, and queues `TaskBOF`.
+
+## Output
+
+The BOF prints candidate writable PATH directories when it finds them.

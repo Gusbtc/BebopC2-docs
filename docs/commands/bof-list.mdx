@@ -1,0 +1,33 @@
+---
+title: bof-list
+description: List operator and built-in BOFs.
+---
+
+# bof-list
+
+## Usage
+
+```text
+[BEBOP ~]$ bof-list
+```
+
+## How it works
+
+The operator queries `/api/library`. The teamserver merges operator BOFs from `~/.bebop/bofs/` with read-only built-ins from `teamserver/resources/bofs/manifest.json`; no beacon task is queued.
+
+## Output
+
+```text
+Operator BOFs:
+  bebop_test_bof.obj  (1.2 KB)
+
+Built-in BOFs:
+  adcs_enum  [adcs_enum.x64.o]  (44.6 KB)
+  ldapsearch  [ldapsearch.x64.o]  (13.2 KB)
+```
+
+Empty library:
+
+```text
+(no BOFs in library)
+```

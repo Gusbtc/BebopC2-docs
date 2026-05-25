@@ -1,0 +1,52 @@
+---
+title: File Browser
+description: Browse and transfer files through beacon tasks.
+---
+
+# File Browser
+
+The file browser provides a tree-oriented workflow for authorized file operations through a beacon.
+
+## Typical operations
+
+| Action | Description |
+| --- | --- |
+| List | Show directory contents |
+| Cat | Read a file as text |
+| Download | Stage file exfiltration to loot |
+| Upload | Send a local file to the beacon |
+| Mkdir | Create directory |
+| Delete | Remove file or directory when supported |
+| Copy path | Copy remote path into terminal workflow |
+
+## Transfer behavior
+
+File transfer uses chunked payloads. Large files take multiple beacon cycles unless session mode is active.
+
+Upload behavior:
+
+| Detail | Value |
+| --- | --- |
+| Server request body limit | `257 MiB` |
+| Server file limit | `256 MiB` |
+| Chunk size | `64 KiB` |
+| Remote destination path limit | `260` bytes |
+| First chunk metadata | UTF-8 destination path length plus path bytes |
+
+Download behavior:
+
+| Detail | Value |
+| --- | --- |
+| First fragment metadata | Filename length plus filename bytes |
+| Completion flag | `FlagLastFragment` |
+| Max fragments | `16384` |
+| Max assembled file | `100 MiB` |
+| Disk path | `~/.bebop/exfil/<label>_<basename>` by default |
+
+## Operator guidance
+
+- Confirm authorization before collecting files.
+- Prefer targeted paths over broad collection.
+- Use loot labels that make later reporting clear.
+- Watch event log and results for transfer errors.
+- Clean `~/.bebop/exfil/` after the retention period for the engagement.

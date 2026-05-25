@@ -1,0 +1,78 @@
+---
+title: Beacons
+description: Modular agent architecture and technical properties.
+---
+
+# Beacons
+
+Beacons are the core agents of the BebopC2 ecosystem. They are designed to be asynchronous, resilient, and extremely difficult to detect through static or behavioral analysis.
+
+## Core model
+
+The beacon runs a check-in loop, decrypts task envelopes, dispatches supported task types, then returns encrypted results. Windows and Linux share the same high-level protocol but have different execution capabilities.
+
+## Windows Beacon
+
+Path: `beacon/`
+
+The Windows beacon is a native Win32 x64 implant written in C. It does not import the standard C library (No CRT) and uses dynamic API resolution for all system interactions.
+
+### Key Properties
+
+- **In-Memory Linker:** Native loader for Windows x64 COFF files (BOFs).
+- **Dynamic API Resolution:** PEB walking and DJB2 hashing to hide API usage from the IAT.
+- **XOR Obfuscation:** All strings are encrypted at build time and decrypted only in RAM.
+- **WinHTTP Transport:** Efficient, encrypted beaconing over HTTP/HTTPS.
+- **Interactive Session:** Persistent TCP-based channel for real-time interaction.
+- **SOCKS5 Relay:** Built-in pivot capability for network exploration.
+- **.NET Support:** `execute-assembly` fork-and-run and `inline-assembly` BOF-backed in-process CLR hosting.
+
+
+## Linux Beacon
+
+Path: `beacon-linux/`
+
+The Linux beacon is a statically linked ELF binary using mbedTLS for encrypted communications.
+
+### Key Properties
+
+- **Static Linking:** No dependencies on system GLIBC versions (musl-based).
+- **Architecture Metadata:** Reports x86, x64, ARM, or ARM64 from compile-time target; the normal setup path verifies x86_64 Linux builds.
+- **Native Builtins:** Essential host and network enumeration tools.
+- **Pivot Ready:** Supports SOCKS5 relay and interactive sessions.
+
+## Capabilities Comparison
+
+| Capability | Windows | Linux |
+| --- | --- | --- |
+| BOF Loading (Modular) | Yes, x64 COFF | No |
+| .NET In-Process Hosting | Yes | No |
+| File Transfer | Yes | Yes |
+| SOCKS5 Proxying | Yes | Yes |
+| Dynamic WinAPI Hashing | Yes | Not Applicable |
+| Static Linking (musl) | Not Applicable | Yes |
+| Interactive Terminal | Yes | Yes |
+
+## Liveness
+
+The teamserver and operator UI consider a beacon alive until:
+
+```text
+last_seen + sleep + 10 seconds
+```
+
+When that threshold passes, the UI marks it dead and delete actions remove the row instead of waiting for a callback.
+
+## Metadata
+
+During registration, beacons transmit the following metadata to the teamserver:
+
+| Field | Description |
+| --- | --- |
+| `id` | Unique beacon identifier. |
+| `session_key` | Generated AES key for transport encryption. |
+| `sleep` / `jitter` | Latency settings for check-ins. |
+| `hostname` / `username` | Machine and user context. |
+| `process` / `pid` | Identity of the host process. |
+| `integrity` | Integrity level (e.g., Medium, High, System). |
+| `arch` / `platform` | Processor architecture and OS type. |

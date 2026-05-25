@@ -1,0 +1,20 @@
+---
+title: priv-always-install-elevated
+description: Check AlwaysInstallElevated policy through a built-in BOF.
+---
+
+# priv-always-install-elevated
+
+## Usage
+
+```text
+[BEBOP ~]$ priv-always-install-elevated
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `priv-always-install-elevated.x64.o`, accepts no arguments, queues `TaskBOF`, and the beacon executes it in-process.
+
+## Output
+
+The BOF prints the policy state it finds. Any supplied argument is rejected by the teamserver.

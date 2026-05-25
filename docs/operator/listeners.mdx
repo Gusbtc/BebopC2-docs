@@ -1,0 +1,46 @@
+---
+title: Listeners
+description: Create and manage HTTP/HTTPS listeners.
+---
+
+# Listeners
+
+Listeners receive beacon registration, check-in, and result traffic.
+
+## Listener fields
+
+| Field | Description |
+| --- | --- |
+| Name | Operator-friendly label |
+| Protocol | HTTP or HTTPS |
+| Host | Host compiled into beacon builds |
+| Bind address | Local address used by the listener socket |
+| Port | Port bound by the teamserver |
+| Custom headers | Optional headers returned by listener responses |
+| Auto-cert | HTTPS listener uses generated certificate and beacon build ignores certificate errors |
+| Status | Running or stopped |
+
+## Host selection
+
+The listener host must be reachable from the beacon environment. For local testing, this is often the host-only or NAT address of the VM network.
+
+Examples:
+
+```text
+127.0.0.1       Local-only testing
+192.168.56.1    Host-only lab network
+10.10.10.5      VPN or controlled lab segment
+```
+
+## HTTPS
+
+Use HTTPS when traffic crosses a network boundary. Keep certificate handling predictable and document the listener hostnames used in a lab.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Beacon never appears | Listener host reachable from target VM |
+| Registration works, check-in fails | Route paths and listener still running |
+| Build uses old host | Rebuild beacon after listener changes |
+| Browser API blocked | CORS origin matches operator-client |

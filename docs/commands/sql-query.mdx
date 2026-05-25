@@ -1,0 +1,20 @@
+---
+title: sql-query
+description: Run a SQL query through a built-in BOF.
+---
+
+# sql-query
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-query <server> <query> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-query.x64.o` and packs server, database, linked server, impersonation, and query strings in the order expected by the BOF.
+
+## Output
+
+The BOF prints query output or SQL error text.

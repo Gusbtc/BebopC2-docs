@@ -1,0 +1,31 @@
+---
+title: hostname
+description: Return target hostname.
+---
+
+# hostname
+
+## Usage
+
+```text
+[BEBOP ~]$ hostname
+```
+
+## How it works
+
+Windows calls dynamically resolved `GetComputerNameA`. Linux calls `gethostname` and `uname`, so it also reports kernel name, release, and machine architecture.
+
+## Output
+
+Windows returns only the computer name:
+
+```text
+DC
+```
+
+Linux returns hostname plus kernel information:
+
+```text
+hostname: web01
+kernel: Linux 6.8.0-31-generic x86_64
+```

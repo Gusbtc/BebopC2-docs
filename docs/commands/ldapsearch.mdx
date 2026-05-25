@@ -1,0 +1,32 @@
+---
+title: ldapsearch
+description: Run LDAP queries from the target context.
+---
+
+# ldapsearch
+
+## Usage
+
+```text
+[BEBOP ~]$ ldapsearch <filter> [attributes] [--count N] [--scope N] [--hostname dc] [--dn baseDN] [--ldaps]
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. The teamserver resolves `ldapsearch.x64.o` and packs: filter, attributes, result limit, scope, hostname, base DN, and LDAPS flag. The BOF performs the LDAP work from the beacon process context and returns its own text output.
+
+## Output
+
+```text
+[BEBOP ~]$ ldapsearch "(objectClass=computer)" dNSHostName
+[*] Distinguished name: DC=support,DC=htb
+[*] targeting DC: \\dc.support.htb
+[*] Binding to dc.support.htb
+[+] Successfully bound to LDAP server
+[*] Filter: (objectClass=computer)
+[*] Returning specific attribute(s): dNSHostName
+
+--------------------
+dNSHostName: dc.support.htb
+retrieved 1 results total
+```

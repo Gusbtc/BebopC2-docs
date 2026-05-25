@@ -1,0 +1,36 @@
+---
+title: mkdir
+description: Create a directory.
+---
+
+# mkdir
+
+## Usage
+
+```text
+[BEBOP ~]$ mkdir <path>
+```
+
+## How it works
+
+Windows calls dynamically resolved `CreateDirectoryA`. Linux calls `mkdir` with mode `0755`.
+
+## Output
+
+Windows success is silent. Real-time UI may show:
+
+```text
+[*] task completed (no output)
+```
+
+Windows error shape:
+
+```text
+mkdir: failed (error 183)
+```
+
+Linux success:
+
+```text
+created: /tmp/newdir
+```

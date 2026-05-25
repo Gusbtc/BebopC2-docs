@@ -1,0 +1,152 @@
+---
+title: API reference
+description: Teamserver API routes and payload behavior.
+---
+
+# API reference
+
+This page documents the teamserver routes exposed by `teamserver/server/server.go`. Management routes require a bearer token unless noted.
+
+## Beacon protocol routes
+
+These routes are mounted on the management server and on additional beacon listeners.
+
+| Method | Route | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api/pubkey` | No | Return the RSA public key used for registration. |
+| `POST` | `/api/register` | No | Accept RSA-OAEP encrypted beacon metadata. |
+| `POST` | `/api/checkin` | No | Accept a 4-byte beacon ID and return encrypted tasks. |
+| `POST` | `/api/result` | No | Accept encrypted task output prefixed by beacon ID. |
+
+## Auth routes
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/auth/login` | Return JWT for valid credentials. |
+| `POST` | `/api/auth/logout` | Revoke the current JWT. |
+| `POST` | `/api/ws-ticket` | Return a short-lived, one-use WebSocket ticket for authenticated operators. |
+
+Login validates against `~/.bebop/operators.db` and returns a 24-hour JWT. Logout adds the presented token to an in-memory revocation map until its expiry.
+
+## Sessions and tasking
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/sessions` | List beacons with liveness, listener, session, shell, and SOCKS state. |
+| `DELETE` | `/api/sessions/{id}` | Queue beacon exit if alive, remove immediately if dead. |
+| `POST` | `/api/task` | Queue a generic task. |
+| `GET` | `/api/results/{id}` | Return results for a beacon. Supports `?since=<unix>`. |
+
+`POST /api/task` accepts:
+
+```json
+{
+  "beacon_id": 1,
+  "type": 12,
+  "code": 0,
+  "args": "whoami",
+  "transport": "session"
+}
+```
+
+If the beacon is in session mode and `transport` is not `http`, the server tries to send the task immediately over the session TCP connection. If that fails, the task remains queued for HTTP check-in.
+
+## Listeners and builds
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/listeners` | List listener definitions. |
+| `POST` | `/api/listeners` | Create and start an HTTP or HTTPS listener. |
+| `DELETE` | `/api/listeners/{id}` | Stop and remove a non-default listener. |
+| `POST` | `/api/build` | Compile a Windows or Linux beacon for a listener. |
+
+Build payload:
+
+```json
+{
+  "listener_id": 1,
+  "sleep_ms": 5000,
+  "jitter_pct": 20,
+  "format": "exe",
+  "session_port": 8443,
+  "platform": "windows"
+}
+```
+
+The builder validates host, port, sleep, and jitter before compiling.
+
+## File and loot routes
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/upload` | Split a local file into `64 KiB` stage chunks for beacon upload. |
+| `GET` | `/api/loot` | List exfil metadata. |
+| `GET` | `/api/files/{label}` | Download an exfiltrated file from disk. |
+| `DELETE` | `/api/files/{label}` | Delete loot metadata and disk file. |
+
+Upload limits:
+
+| Field | Limit |
+| --- | --- |
+| Request body | `257 MiB` |
+| File content | `256 MiB` |
+| Multipart memory | `8 MiB` |
+| Destination path | `260` bytes |
+| Chunk size | `64 KiB` |
+
+Exfil assembly limits are enforced server-side: maximum `16384` fragments and `100 MiB` assembled file size.
+
+## Session mode and SOCKS
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/interactive` | Queue session-mode upgrade. |
+| `DELETE` | `/api/session/{id}` | Close active persistent session. |
+| `POST` | `/api/socks` | Start a local SOCKS5 proxy for a session-mode beacon. |
+| `GET` | `/api/socks` | List active SOCKS5 proxies. |
+| `DELETE` | `/api/socks/{id}` | Stop a SOCKS5 proxy. |
+
+If no SOCKS port is requested, the server tries ports `1080` through `1099`.
+
+## Assembly routes
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/exec-assembly` | Convert .NET assembly to shellcode and queue fork-and-run execution. |
+| `POST` | `/api/inline-assembly` | Queue raw .NET assembly bytes for in-process CLR hosting. |
+| `GET` | `/api/assemblies` | List saved assemblies. |
+| `POST` | `/api/assemblies` | Upload an assembly to `~/.bebop/assemblies`. |
+| `DELETE` | `/api/assemblies/{name}` | Delete a saved assembly. |
+| `POST` | `/api/bof` | Queue uploaded, library, or built-in Windows x64 BOF. |
+| `GET` | `/api/library` | List built-in BOFs, operator BOFs, and operator assemblies. |
+| `POST` | `/api/library` | Upload `.o`, `.obj`, or `.exe` into the operator library. |
+| `DELETE` | `/api/library/{name}` | Delete an operator library file. Built-in BOFs are read-only. |
+
+Assembly inputs are capped at `64 MiB`. Library names cannot contain path separators or `..`.
+
+`inline-assembly` is rejected for non-Windows or non-x64 beacons. In v1.5.0 direct mode is rejected; `auto` and `bridge` both use the bridge path. The handler queues a BOF task containing `InlineAssembly.Loader.x64.obj`, `Runtime.Loader.dll`, the target assembly, and parsed Windows arguments.
+
+`/api/bof` is rejected for non-Windows or non-x64 beacons. Named BOFs resolve from `~/.bebop/bofs/` first, then `teamserver/resources/bofs/manifest.json`.
+
+## Events and terminal state
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/events` | Return event log. |
+| `POST` | `/api/events` | Add an event and publish it to operator clients. |
+| `GET` | `/api/chat` | Return recent operator chat messages. |
+| `POST` | `/api/chat` | Add a chat message as the authenticated operator and broadcast it to operator clients. |
+| `GET` | `/api/terminal/{id}` | Return saved terminal state for a beacon. |
+| `PUT` | `/api/terminal/{id}` | Save terminal state and file-browser cache. |
+| `POST` | `/api/terminal/{id}` | Same as `PUT` for clients that use POST. |
+
+## Operator metadata
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/mcp/status` | Return HTTP MCP configuration metadata for the operator UI. Never returns the MCP token. |
+| `GET` | `/api/mcp/token` | Return the configured MCP bearer token to an authenticated operator and audit the reveal in the event log. |
+| `POST` | `/api/mcp` | JSON-RPC MCP endpoint for tools and resources. Requires bearer auth. |
+| `GET` | `/api/mcp` | Stream MCP server-sent events sourced from the operator event hub. |
+
+`/api/mcp` accepts normal operator JWTs and MCP bearer tokens. MCP tokens can be plain full-access tokens or scoped token files with `token=<secret>` and `scopes=read,task,file,library,listener,build,admin`.

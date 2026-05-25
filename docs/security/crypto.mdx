@@ -1,0 +1,37 @@
+---
+title: Crypto model
+description: Cryptographic design used by the beacon protocol.
+---
+
+# Crypto model
+
+BebopC2 uses a hybrid protocol: RSA for initial session establishment, then symmetric encryption and authentication for beacon traffic.
+
+## Registration
+
+During registration, the beacon obtains the teamserver public key and uses RSA-2048 OAEP with SHA-256 to protect initial session material.
+
+The teamserver uses the corresponding private key stored under its persistence directory.
+
+## Session messages
+
+After registration, beacon messages use:
+
+- AES-256-CBC for confidentiality
+- HMAC-SHA256 for message authentication
+- subkey separation with `HMAC-SHA256(master, label)` for encryption and authentication keys
+- PKCS7 padding for AES block alignment
+
+The wire body is:
+
+```text
+IV(16 bytes) || HMAC-SHA256(32 bytes) || AES-CBC ciphertext
+```
+
+## Design notes
+
+The HMAC is verified before decrypted content is trusted. AES and HMAC keys are separated with the `aes-cbc` and `hmac-sha256` labels so one primitive does not reuse the exact same key material as the other.
+
+## Operational limits
+
+Cryptography protects the transport content. It does not replace operator access control, host hardening, or careful handling of loot and generated payloads.

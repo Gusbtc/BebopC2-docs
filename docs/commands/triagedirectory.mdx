@@ -1,0 +1,24 @@
+---
+title: triagedirectory
+description: Linux sensitive-file triage helper.
+---
+
+# triagedirectory
+
+## Usage
+
+```text
+[BEBOP ~]$ triagedirectory [path]
+```
+
+## How it works
+
+Linux walks the target directory in `beacon-linux/src/exec/builtin.c`, skips noisy system paths, categorizes filenames that match sensitive patterns, and prints a bounded summary. With no path, it scans from a default location chosen by the built-in.
+
+## Output
+
+```text
+[BEBOP ~]$ triagedirectory /home
+[keys] /home/user/.ssh/id_rsa
+[config] /home/user/.aws/credentials
+```

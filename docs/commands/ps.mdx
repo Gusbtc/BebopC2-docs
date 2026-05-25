@@ -1,0 +1,34 @@
+---
+title: ps
+description: List processes.
+---
+
+# ps
+
+## Usage
+
+```text
+[BEBOP ~]$ ps
+```
+
+## How it works
+
+Windows uses `CreateToolhelp32Snapshot`, `Process32First`, and `Process32Next`. Linux reads `/proc/<pid>/stat`, `/proc/<pid>/status`, and `/proc/<pid>/cmdline`, then sorts by PID.
+
+## Output
+
+Windows:
+
+```text
+PID       Name                            Parent PID
+--------  ----                            ----------
+4         System                          0
+3796      beacon.exe                      868
+```
+
+Linux:
+
+```text
+PID      PPID     USER       STATE  COMMAND
+1        0        root       S      /sbin/init
+```

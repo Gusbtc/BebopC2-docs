@@ -1,0 +1,31 @@
+---
+title: kill
+description: Terminate a process.
+---
+
+# kill
+
+## Usage
+
+```text
+[BEBOP ~]$ kill <pid>
+[BEBOP ~]$ kill [-sig] <pid>   # Linux
+```
+
+## How it works
+
+Windows opens the target with `OpenProcess(PROCESS_TERMINATE)` and calls `TerminateProcess`. Linux parses an optional signal and calls `kill`.
+
+## Output
+
+Windows success is silent. Windows error:
+
+```text
+kill: cannot open PID 1234 (error 5)
+```
+
+Linux success:
+
+```text
+killed PID 1234 with signal 15
+```

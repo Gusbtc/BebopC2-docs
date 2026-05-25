@@ -1,0 +1,44 @@
+---
+title: Teamserver
+description: Command and Control authority and module orchestration.
+---
+
+# Teamserver
+
+The teamserver is the central nervous system of BebopC2. Built in Go, it handles authentication, data persistence, listener lifecycle, and the dynamic assembly of modular payloads.
+
+## Core Responsibilities
+
+- **Module Packing:** When a modular task is issued (like `inline-assembly`), the teamserver orchestrates the packing of the **Loader BOF**, **Support DLLs**, and the **Target Payload** into a single task message.
+- **Beacon Management:** Tracks hundreds of active sessions, managing their sleep intervals, jitter, and pending tasks.
+- **Persistence:** SQLite stores task logs, command results, operator chat, and operator accounts. JSON files store listeners, beacons, events, terminal state, loot metadata, and RSA key material.
+- **Build Pipeline:** The teamserver acts as a **Cross-Platform Builder**, compiling unique beacon binaries with listener-specific configuration and randomized obfuscation keys.
+- **Pivoting Infrastructure:** Coordinates SOCKS5 proxy binds and bridges them to the beacon's internal relay module.
+
+## Payload Orchestration
+
+The teamserver ensures that the beacon remains a **minimalist agent**. It keeps all the "heavy" logic (like the .NET COFF Loader) in its local resources and only sends it to the target machine when specifically requested by the operator.
+
+### Resource Management
+
+| Data Type | Persistence | Role |
+| --- | --- | --- |
+| **Tasks & Results** | SQLite | Full audit trail of every command and its output. |
+| **Sessions** | JSON + memory | Metadata of all beacons (alive or historical). |
+| **Module Library** | Local FS | Built-in BOFs, operator BOFs, uploaded assemblies, and managed bridge DLL. |
+| **Loot** | Local FS | Exfiltrated files and organized snapshots. |
+
+## API Integration
+
+The teamserver exposes a RESTful API for management and a specialized binary API for beacon traffic.
+
+- **Operator Traffic:** Requires JWT-based authentication.
+- **Beacon Traffic:** Uses a proprietary encrypted protocol built over HTTP/HTTPS or persistent TCP.
+
+## Security Model
+
+The teamserver enforces a strict **separation of duties**:
+
+1.  **Transport Security:** All beacon traffic is protected by AES-256-CBC with per-session key material established via RSA-2048 OAEP.
+2.  **Authentication:** Operators must authenticate using the configured credentials to access the console or issue tasks.
+3.  **Audit Logging:** Every action taken by an operator is recorded in the central event log for post-operation review.

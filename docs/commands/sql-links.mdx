@@ -1,0 +1,20 @@
+---
+title: sql-links
+description: Enumerate SQL linked servers through a built-in BOF.
+---
+
+# sql-links
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-links <server> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-links.x64.o` and packs up to four string arguments.
+
+## Output
+
+The BOF prints linked-server data visible to the current SQL context.

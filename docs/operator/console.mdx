@@ -1,0 +1,65 @@
+---
+title: Operator Console
+description: Browser-based operator workflow.
+---
+
+# Operator Console
+
+The operator console is the daily interface for BebopC2. It is browser-based, served by `operator-client`, and backed by authenticated teamserver APIs.
+
+## First screen
+
+After login, use the top navigation to move between:
+
+- Sessions
+- Listeners
+- Build
+- MCP
+
+Inside Sessions, the lower/right panel provides terminal, event log, loot, library, MCP, and chat tabs.
+
+The WebSocket connection carries events, chat, and real-time updates. If the connection indicator is offline, API calls may still work, but live updates will not.
+
+On connection, `/ws/operator` sends sync snapshots for sessions, listeners, events, loot, and the latest chat messages. After that, the UI consumes incremental hub events.
+
+## Session graph
+
+The graph view helps operators understand where beacons sit relative to listener and session mode state.
+
+![Session graph](/img/graph_sessions.png)
+
+## Session table
+
+The table view is better for repeated operations: filtering, sorting, right-click actions, and jumping into interaction.
+
+![Session table](/img/table_sessions.png)
+
+## Operator workflow
+
+1. Create or confirm a listener.
+2. Build a platform-specific beacon.
+3. Confirm session registration.
+4. Open an interact terminal.
+5. Run lightweight discovery commands.
+6. Use file browser or transfer commands when authorized.
+7. Review events and loot.
+8. Cleanly exit or kill sessions when done.
+
+## Real-time topics
+
+| Topic | Typical actions | UI effect |
+| --- | --- | --- |
+| `sessions` | `sync`, `add`, `update`, `checkin`, `delete` | Session table and graph refresh. |
+| `listeners` | `sync`, `add`, `delete` | Listener list refresh. |
+| `results` | `add` | Terminal output and result views update. |
+| `events` | `sync`, `add` | Event log updates. |
+| `loot` | `sync`, `add`, `delete` | Loot panel updates. |
+| `chat` | `sync`, `add` | Operator chat updates. |
+
+## Best practices
+
+- Use tags and notes externally until native tagging is added.
+- Keep event logs during validation.
+- Prefer platform-aware commands.
+- Avoid running long tasks without understanding beacon sleep and session mode.
+- Use a lab VM to validate new beacon changes before release.

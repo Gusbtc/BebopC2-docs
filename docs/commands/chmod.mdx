@@ -1,0 +1,25 @@
+---
+title: chmod
+description: Change Linux file permissions.
+---
+
+# chmod
+
+## Usage
+
+```text
+[BEBOP ~]$ chmod <mode> <path>
+```
+
+## How it works
+
+Linux parses an octal mode and calls `chmod()` in `beacon-linux/src/exec/builtin.c`. Windows does not implement this built-in.
+
+## Output
+
+```text
+[BEBOP ~]$ chmod 600 /tmp/key
+chmod: /tmp/key -> 0600
+```
+
+Errors include invalid modes, missing paths, and syscall failures.

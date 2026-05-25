@@ -1,0 +1,38 @@
+---
+title: ipconfig
+description: List network adapters.
+---
+
+# ipconfig
+
+## Usage
+
+```text
+[BEBOP ~]$ ipconfig
+[BEBOP ~]$ ifconfig   # Linux alias
+```
+
+## How it works
+
+Windows calls `GetAdaptersAddresses` and skips loopback adapters. Linux uses `getifaddrs` and prints interface flags plus IPv4, IPv6, and MAC data when present.
+
+## Output
+
+Windows:
+
+```text
+
+[Ethernet0]
+  IPv4: 10.10.11.174
+  IPv6: fe80:0000:0000:0000:aaaa:bbbb:cccc:dddd
+```
+
+Linux:
+
+```text
+eth0
+  flags: UP RUNNING
+  inet  10.10.11.20/24
+  inet6 fe80::aaaa:bbbb:cccc:dddd
+  ether 00:50:56:b0:aa:bb
+```

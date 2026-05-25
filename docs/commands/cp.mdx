@@ -1,0 +1,30 @@
+---
+title: cp
+description: Copy a file.
+---
+
+# cp
+
+## Usage
+
+```text
+[BEBOP ~]$ cp <src> <dst>
+```
+
+## How it works
+
+Windows parses source/destination and calls `CopyFileA` with overwrite enabled. Linux copies with `open`, `read`, and `write` in the native built-in.
+
+## Output
+
+Windows success is silent. Error shape:
+
+```text
+cp: failed (error 5)
+```
+
+Linux success:
+
+```text
+copied: /tmp/a -> /tmp/b (12 bytes)
+```

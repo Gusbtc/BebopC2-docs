@@ -1,0 +1,26 @@
+---
+title: privs
+description: List Windows token privileges.
+---
+
+# privs
+
+## Usage
+
+```text
+[BEBOP ~]$ privs
+```
+
+## How it works
+
+Windows opens the current token, reads `TokenPrivileges` with `GetTokenInformation`, resolves names through `LookupPrivilegeNameA`, and formats privilege attributes.
+
+## Output
+
+```text
+  SeChangeNotifyPrivilege                  [Enabled+Default]
+  SeImpersonatePrivilege                   [Enabled]
+  SeDebugPrivilege                         [Disabled]
+```
+
+Windows-only native command.

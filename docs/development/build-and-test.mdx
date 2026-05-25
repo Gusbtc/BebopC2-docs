@@ -1,0 +1,56 @@
+---
+title: Build and test
+description: Local build and verification workflow for BebopC2.
+---
+
+# Build and test
+
+BebopC2 currently uses direct local builds instead of a CI pipeline. Run the checks for the component you touched before shipping a change.
+
+## Teamserver
+
+```bash
+cd teamserver
+go mod tidy
+go test ./...
+go build -o ../bin/teamserver .
+```
+
+Use `go test ./...` even when the changed package has no explicit tests. It catches compile errors across handlers, models, protocol code, builders, and persistence packages.
+
+## Operator client
+
+```bash
+cd operator-client
+go mod tidy
+go test ./...
+go build -o ../bin/operator-client .
+```
+
+The operator embeds `static/` at build time. Rebuild the binary after changing HTML, CSS, JavaScript, or images.
+
+## Beacon
+
+```bash
+cd beacon
+cmake -B build
+cmake --build build
+```
+
+For beacon changes, also verify that new strings and APIs follow the project rules:
+
+```bash
+strings -a -el beacon/build/beacon.exe | less
+```
+
+No new sensitive plaintext strings should appear in the wide-string output.
+
+## Practical release check
+
+Before tagging a release, run:
+
+```bash
+cd teamserver && go test ./... && go build -o ../bin/teamserver .
+cd ../operator-client && go test ./... && go build -o ../bin/operator-client .
+cd ../beacon && cmake -B build && cmake --build build
+```

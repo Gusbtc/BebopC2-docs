@@ -1,0 +1,30 @@
+---
+title: upload
+description: Upload a local operator file to target.
+---
+
+# upload
+
+## Usage
+
+```text
+[BEBOP ~]$ upload <remote_path>
+```
+
+## How it works
+
+The operator uploads the local file to `/api/upload`; the teamserver stages it as `64 KiB` `TaskFileStage` fragments. The beacon creates the destination file, rejects traversal-like paths, writes chunks, and acknowledges the last fragment.
+
+## Output
+
+The UI opens a local file picker, the teamserver stages `64 KiB` chunks, and the beacon writes them to the requested remote path. Completion appears as:
+
+```text
+[+] upload complete
+```
+
+If the beacon cannot create the destination, Linux errors look like:
+
+```text
+stage: cannot create '/tmp/file' (Permission denied)
+```

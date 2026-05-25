@@ -1,0 +1,24 @@
+---
+title: getintegrity
+description: Return Windows token integrity level.
+---
+
+# getintegrity
+
+## Usage
+
+```text
+[BEBOP ~]$ getintegrity
+```
+
+## How it works
+
+Windows opens the current process token with `OpenProcessToken`, reads `TokenIntegrityLevel` with `GetTokenInformation`, then maps the mandatory-label SID RID to `Low`, `Medium`, `High`, or `System`.
+
+## Output
+
+```text
+High (RID: 0x3000)
+```
+
+Possible names are `Low`, `Medium`, `High`, and `System`.

@@ -1,0 +1,28 @@
+---
+title: sysinfo
+description: Return Windows OS, architecture, memory, host, and user.
+---
+
+# sysinfo
+
+## Usage
+
+```text
+[BEBOP ~]$ sysinfo
+```
+
+## How it works
+
+Windows reads product/build values from `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion`, then calls `GetNativeSystemInfo`, `GlobalMemoryStatusEx`, `GetComputerNameA`, and `GetUserNameA`.
+
+## Output
+
+```text
+OS:       Microsoft Windows Server 2022 Standard (Build 20348)
+Arch:     x64
+RAM:      4096 MB total / 2210 MB free
+Hostname: DC
+User:     Administrator
+```
+
+Windows-only native command.

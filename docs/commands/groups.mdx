@@ -1,0 +1,25 @@
+---
+title: groups
+description: List current user local groups on Windows.
+---
+
+# groups
+
+## Usage
+
+```text
+[BEBOP ~]$ groups
+```
+
+## How it works
+
+Windows reads the current username with `GetUserNameA`, converts it to UTF-16, then calls `NetUserGetLocalGroups` with `LG_INCLUDE_INDIRECT`.
+
+## Output
+
+```text
+  Administrators
+  Remote Desktop Users
+```
+
+Windows-only native command.

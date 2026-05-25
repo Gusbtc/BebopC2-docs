@@ -1,0 +1,180 @@
+---
+title: Commands
+description: Beacon commands grouped by operator workflow.
+---
+
+# Commands
+
+Beacon command support depends on platform and build. The current terminal `help` output is the source of truth for the selected beacon. Output shapes are documented in the [command reference](./command-reference).
+
+## Identity / Target
+
+| Command | Purpose |
+| --- | --- |
+| `whoami` / `id` | Current user context |
+| `hostname` | Hostname |
+| `domain` | Joined domain or workgroup context |
+| `getpid` | Current process ID |
+| `getintegrity` | Windows integrity level |
+| `sysinfo` | OS, architecture, memory, hostname, user |
+| `drives` | Windows logical drives |
+| `uptime` | System uptime |
+
+## Filesystem
+
+| Command | Purpose |
+| --- | --- |
+| `pwd` | Current directory |
+| `cd` | Change directory |
+| `ls` / `dir` | List directory |
+| `cat` | Read file content |
+| `stat` | File metadata |
+| `mkdir` | Create directory |
+| `rm` | Delete file |
+| `rmdir` | Remove empty directory |
+| `cp` | Copy file |
+| `mv` | Move or rename |
+
+Windows file-browser output is JSON-shaped so the operator UI can render entries, attributes, sizes, and timestamps without parsing terminal tables.
+
+## Process / Services
+
+| Command | Purpose |
+| --- | --- |
+| `ps` | Process list |
+| `kill` | Terminate process |
+| `services` | Windows service list |
+| `schtasks-enum` | Scheduled task enumeration BOF |
+| `safe-harbor` | Process reconnaissance BOF |
+
+## Network / Pivoting
+
+| Command | Purpose |
+| --- | --- |
+| `ipconfig` / `ifconfig` | Network adapter configuration |
+| `arp` | ARP table |
+| `netstat` | TCP/UDP connections |
+| `dns` | DNS lookup |
+| `xpipe` | Named pipe enumeration BOF |
+| `curl` | Linux HTTP GET helper |
+| `portscan` | Linux TCP connect scan |
+| `socks5` | Start or stop SOCKS5 relay |
+| `interactive` | Start real-time session mode |
+
+## Domain / Directory
+
+| Command | Purpose |
+| --- | --- |
+| `ldapsearch` | LDAP query BOF |
+| `adcs_enum` | ADCS enumeration BOF |
+| `password-policy` | Domain password policy BOF |
+| `net-shares` | Network share enumeration BOF |
+| `local-sessions` | Local/RDP session enumeration BOF |
+| `netloggedon` | Logged-on user enumeration BOF |
+
+Built-in BOFs are Windows x64 only and read from `teamserver/resources/bofs/manifest.json`.
+
+## Privilege / Credentials
+
+| Command | Purpose |
+| --- | --- |
+| `privs` | Token privileges |
+| `groups` | Current user groups |
+| `priv-always-install-elevated` | AlwaysInstallElevated policy BOF |
+| `priv-autologon` | Winlogon AutoLogon values BOF |
+| `priv-credential-manager` | Credential Manager entries BOF |
+| `priv-hijackable-path` | Writable PATH directories BOF |
+| `priv-modifiable-autorun` | Writable autorun executables BOF |
+| `priv-modifiable-service` | Modifiable service permission BOF |
+| `priv-powershell-history` | PSReadLine history location BOF |
+| `priv-token-privileges` | Current token privilege BOF |
+| `priv-uac-status` | UAC and integrity status BOF |
+| `priv-unquoted-service-path` | Unquoted service path BOF |
+
+## Host Data / Registry
+
+| Command | Purpose |
+| --- | --- |
+| `env` | Environment variables |
+| `getenv` | One environment variable |
+| `clipboard` | Clipboard read where supported |
+| `reg_query` | Query registry |
+| `reg_set` | Set registry value |
+| `regsession` | Registry session hives BOF |
+| `msi-search` | Cached MSI metadata BOF |
+
+## SQL Server
+
+| Command | Purpose |
+| --- | --- |
+| `sql-1434udp` | SQL Browser info |
+| `sql-info` | SQL Server information |
+| `sql-whoami` | SQL login, user, and roles |
+| `sql-impersonate` | Impersonation rights |
+| `sql-links` | Linked servers |
+| `sql-users` | Database users |
+| `sql-databases` | Databases |
+| `sql-tables` | Tables |
+| `sql-columns` | Table columns |
+| `sql-rows` | Row count |
+| `sql-search` | Column-name search |
+| `sql-query` | Custom SQL query |
+| `sql-agentstatus` | SQL Agent status and jobs |
+| `sql-checkrpc` | Linked-server RPC status |
+
+## Execution / Modules
+
+| Command | Purpose |
+| --- | --- |
+| `shell <cmd>` | Run through `cmd.exe /c` |
+| `<program> [args]` | Direct process execution |
+| `runas` | Run process with alternate credentials |
+| `execute-assembly` | Run .NET assembly through fork-and-run path |
+| `inline-assembly` | Run .NET assembly in-process through the loader BOF and managed bridge |
+| `bof-execute` | Run a Windows x64 object file in-process |
+| `ssh` | Linux wrapper around target host's `ssh` client |
+| `triagedirectory` | Linux sensitive-file triage helper |
+
+## Libraries
+
+| Command | Purpose |
+| --- | --- |
+| `assembly-upload` | Upload `.exe` or `.dll` into the operator assembly library |
+| `assembly-list` | List uploaded assemblies |
+| `assembly-delete` | Delete uploaded assembly |
+| `bof-upload` | Upload `.o` or `.obj` into the operator BOF library |
+| `bof-list` | List operator and built-in BOFs |
+
+## Transfer / Control
+
+| Command | Purpose |
+| --- | --- |
+| `download` | Stage file exfiltration |
+| `upload` | Upload file to beacon |
+| `sleep` | Update beacon sleep interval |
+| `exit` | Stop beacon |
+| `clear` | Clear current terminal |
+| `help` | Show selected beacon command reference |
+
+## Linux Utility Set
+
+Linux beacons include a smaller native set:
+
+| Command | Purpose |
+| --- | --- |
+| `whoami` / `id` | User and group context |
+| `hostname` | Hostname and kernel |
+| `pwd`, `cd`, `ls`, `cat` | Filesystem operations |
+| `mkdir`, `rm`, `cp`, `mv`, `chmod` | Filesystem mutation |
+| `ps`, `kill` | Process list and termination |
+| `ipconfig` / `ifconfig`, `netstat`, `portscan` | Network inspection |
+| `curl` | Plain HTTP request helper |
+| `triagedirectory` | Directory summary helper |
+| `ssh` | Execute through target host's `ssh` client |
+| `download`, `upload`, `sleep`, `exit` | Transfer and control |
+
+Linux `curl` is a lightweight HTTP helper. HTTPS returns a clear unsupported message in that built-in path.
+
+## Result handling
+
+Results are correlated by task label. Empty success is valid for some native WinAPI commands. Large outputs may be truncated or fragmented depending on task type and implementation. For long-running work, prefer session mode or file transfer paths.

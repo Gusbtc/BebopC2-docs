@@ -1,0 +1,26 @@
+---
+title: bof-upload
+description: Upload an operator BOF into the teamserver library.
+---
+
+# bof-upload
+
+Uploads a Windows x64 BOF object file into the operator library.
+
+```text
+bof-upload <name.o|name.obj>
+```
+
+## How it works
+
+The command opens a local file picker and posts multipart data to `/api/library`. The teamserver validates the extension, checks the object is x64 COFF, stores it under `~/.bebop/bofs/`, publishes a library update, and logs the operation. It does not execute the object; use `bof-execute` after upload.
+
+## Output
+
+```text
+[BEBOP ~]$ bof-upload bebop_test_bof.obj
+[*] select BOF object file...
+[+] bof "bebop_test_bof.obj" uploaded (1232 bytes)
+```
+
+Uploaded files appear in `bof-list` and in the Library tab under operator files.

@@ -1,0 +1,24 @@
+---
+title: uptime
+description: Return Windows uptime.
+---
+
+# uptime
+
+## Usage
+
+```text
+[BEBOP ~]$ uptime
+```
+
+## How it works
+
+Windows reads monotonic system uptime from dynamically resolved `GetTickCount64` and formats days, hours, minutes, and seconds in the beacon.
+
+## Output
+
+```text
+3 days, 4 hours, 12 minutes, 9 seconds
+```
+
+Windows-only native command.

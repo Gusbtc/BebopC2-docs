@@ -1,0 +1,24 @@
+---
+title: rmdir
+description: Remove an empty Windows directory.
+---
+
+# rmdir
+
+## Usage
+
+```text
+[BEBOP ~]$ rmdir <path>
+```
+
+## How it works
+
+Windows calls dynamically resolved `RemoveDirectoryA`. The directory must be empty or Windows returns an error code.
+
+## Output
+
+Windows success is silent. Error shape:
+
+```text
+rmdir: failed (error 145)
+```

@@ -1,0 +1,67 @@
+---
+title: Session Mode
+description: Persistent TCP mode for low-latency interaction.
+---
+
+# Session Mode
+
+Session mode establishes a persistent TCP connection between beacon and teamserver. It is useful for interactive terminal workflows and tasks where waiting for periodic check-ins is inefficient.
+
+## When to use it
+
+Use session mode when:
+
+- The beacon can reach the session listener.
+- You need low-latency command output.
+- You are transferring multiple files.
+- You are operating inside a lab or approved network segment.
+
+Avoid it when periodic beaconing is sufficient or when network policy does not allow the persistent channel.
+
+## Task support
+
+Session mode supports normal command execution, shell I/O, file actions, and SOCKS lifecycle on Windows and Linux. Windows session mode also fast-paths `execute-assembly` and BOF tasks, which is how current `inline-assembly` is delivered. Linux session mode does not support `.NET` or BOF task types.
+
+## Handshake
+
+The beacon opens a TCP connection to the session listener and sends:
+
+1. Beacon ID as 4 plaintext little-endian bytes.
+2. Connection type byte: session, shell, or SOCKS.
+3. Encrypted confirmation containing the beacon ID again.
+
+After that, each message is framed as:
+
+```text
+uint32_le encrypted_length || encrypted_envelope
+```
+
+The encrypted envelope is the same AES-CBC/HMAC-SHA256 envelope used by HTTP tasking.
+
+## Connection types
+
+| Type | Purpose |
+| --- | --- |
+| `ConnSession` | Main low-latency task/result channel. |
+| `ConnShell` | Dedicated interactive shell stream. |
+| `ConnSocks` | Dedicated SOCKS relay stream. |
+
+The server rejects the session if the encrypted confirmation does not match the registered beacon ID.
+
+## Failure modes
+
+| Symptom | Check |
+| --- | --- |
+| Session mode fails to start | Host and port reachable from beacon |
+| Tasks return `unknown task` | Session loop missing task handler |
+| Connection drops | NAT/firewall timeout, beacon process exit, listener stopped |
+| Output delayed | Long-running task blocks until completion |
+
+## Developer note
+
+When adding a new task type, implement it in both:
+
+- periodic check-in loop
+- session-mode task loop
+
+This keeps behavior consistent across operator workflows.

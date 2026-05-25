@@ -1,0 +1,20 @@
+---
+title: regsession
+description: Enumerate registry session hives through a built-in BOF.
+---
+
+# regsession
+
+## Usage
+
+```text
+[BEBOP ~]$ regsession [host]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `regsession.x64.o`, packs one optional string host argument, queues `TaskBOF`, and returns output produced by the object.
+
+## Output
+
+The BOF prints registry-backed session data or its own error/status text.

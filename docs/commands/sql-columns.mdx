@@ -1,0 +1,20 @@
+---
+title: sql-columns
+description: Enumerate SQL table columns through a built-in BOF.
+---
+
+# sql-columns
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-columns <server> <table> [database] [linkedserver] [impersonate]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-columns.x64.o` and packs server, database, table, linked server, and impersonation strings in the order expected by the BOF.
+
+## Output
+
+The BOF prints column metadata for the requested table.

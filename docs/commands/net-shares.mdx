@@ -1,0 +1,20 @@
+---
+title: net-shares
+description: Enumerate network shares through a built-in BOF.
+---
+
+# net-shares
+
+## Usage
+
+```text
+[BEBOP ~]$ net-shares [target]
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. The teamserver resolves `net-shares.x64.o`, packs one optional wide-string target plus an integer flag currently set to `0`, and queues `TaskBOF`.
+
+## Output
+
+The BOF prints share data from the target reachable to the beacon's current token.

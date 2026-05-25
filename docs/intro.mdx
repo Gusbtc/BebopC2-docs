@@ -1,0 +1,61 @@
+---
+id: intro
+title: BebopC2
+description: Advanced Adversary Simulation & Command and Control Framework.
+slug: /intro
+---
+
+import Link from '@docusaurus/Link';
+
+# BebopC2
+
+**BebopC2** is a modular, asynchronous command and control (C2) framework engineered for authorized security assessments and red team engagements.
+
+Designed with an OPSEC-first philosophy, BebopC2 minimizes the forensic footprint by moving high-risk capabilities like .NET execution into a minimalist, BOF-centric architecture.
+
+:::warning Authorized Operation Only
+BebopC2 is a professional security tool. As an operator, you are responsible for maintaining explicit authorization and adhering to the defined scope of your engagement.
+:::
+
+## Core Capabilities
+
+<div className="card-grid">
+  <div className="doc-card">
+    <strong>Modular Linker</strong>
+    A high-performance, in-memory COFF Linker that allows the deployment of specialized capabilities (BOFs).
+  </div>
+  <div className="doc-card">
+    <strong>Post-Exploitation</strong>
+    Includes a wide range of native commands for situational awareness, file transfer, and process management.
+  </div>
+  <div className="doc-card">
+    <strong>Native Evasion</strong>
+    Beacons are written in C with zero CRT dependencies, utilizing dynamic API resolution to minimize the static footprint.
+  </div>
+  <div className="doc-card">
+    <strong>Collaborative Console</strong>
+    A modern, real-time web UI supporting multi-operator coordination, session graphing, and centralized loot management.
+  </div>
+</div>
+
+## The Operator's Philosophy
+
+BebopC2 is built on the principle that the framework should be as quiet as the operator.
+
+*   **Avoid Process Creation:** Utilize in-process execution for situational awareness tasks.
+*   **Minimize Disk Artifacts:** Prioritize memory-resident modules over traditional file-based staging.
+*   **Context-Aware Execution:** Choose specialized commands and modes based on the target's environment.
+
+
+## Core Architecture
+
+The core agent is designed with minimal static capability bloat, moving advanced features into on-demand, reflectively loaded modules.
+
+## Getting Started
+
+To begin your engagement, proceed through the following stages:
+
+1.  **Infrastructure:** <Link to="/docs/getting-started/installation">Install the Teamserver</Link> and configure your listeners.
+2.  **Weaponization:** <Link to="/docs/getting-started/build-beacons">Generate a modular beacon</Link> tailored to your target architecture.
+3.  **Deployment:** Deliver the implant and confirm the initial callback.
+4.  **Operations:** Navigate to the <Link to="/docs/operator/console">Operator Console</Link> to begin post-exploitation.

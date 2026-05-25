@@ -1,0 +1,35 @@
+---
+title: Authorized use
+description: Scope and safety expectations for BebopC2 usage.
+---
+
+# Authorized use
+
+BebopC2 is intended for authorized security research, lab work, internal red team exercises, and defensive validation. Operate it only in environments where you have explicit permission.
+
+## Operator responsibilities
+
+Before an operation:
+
+- define the written scope
+- identify allowed targets
+- document allowed payload behavior
+- agree on data-handling rules
+- define stop conditions
+- confirm reporting expectations
+
+During an operation:
+
+- log listener changes
+- track tasking
+- avoid unnecessary data collection
+- preserve evidence needed for reporting
+- stop if scope or authorization becomes unclear
+
+## Lab defaults
+
+For local testing, prefer isolated virtual machines and controlled network segments. Avoid running experimental beacons on personal daily-use systems or shared production environments.
+
+## Data handling
+
+Treat collected files, command output, host metadata, and screenshots as sensitive. Store only what the engagement requires and remove local artifacts after the retention period defined by the operation.

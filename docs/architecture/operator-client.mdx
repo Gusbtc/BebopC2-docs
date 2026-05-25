@@ -1,0 +1,58 @@
+---
+title: Operator Client
+description: Browser UI and operator-client architecture.
+---
+
+# Operator Client
+
+The operator client is a Go binary that embeds and serves `operator-client/static/`. It provides the browser UI and keeps the frontend deployment simple: no Node build step is required for the operator console.
+
+## Main surfaces
+
+| Surface | Purpose |
+| --- | --- |
+| Sessions | Table and graph views of active and historical beacons |
+| Listeners | Create, inspect, and stop HTTP/HTTPS listeners |
+| Build | Generate beacons from listener and platform settings |
+| MCP | HTTP MCP configuration and copyable agent prompt |
+| Sessions panel tabs | Terminal, event log, loot, library, MCP, and chat panels |
+
+## Static architecture
+
+```text
+operator-client/
+  main.go
+  static/
+    pages/
+    js/app/
+    css/
+    img/
+```
+
+The current JavaScript is modularized under `static/js/app/`, with separate responsibilities for core state, views, terminal behavior, WebSocket handling, and file browser workflows.
+
+## Runtime relationship
+
+The browser normally talks to the teamserver directly for authenticated API calls and WebSocket updates, while the operator-client serves pages and static assets. If direct REST access fails, the frontend can fall back to the operator-client proxy at `/api/proxy`.
+
+The proxy target is constrained by the `operator-client -teamserver` flag and only forwards authenticated `/api/*` requests to that configured origin. WebSocket URLs still target the teamserver and use `/api/ws-ticket`.
+
+Set CORS on the teamserver to match the operator origin.
+
+```bash
+export BEBOP_ALLOWED_ORIGINS=http://localhost:9090
+```
+
+Operator-client flags:
+
+| Flag | Default | Purpose |
+| --- | --- | --- |
+| `-host` | `127.0.0.1` | UI bind host. |
+| `-port` | `9090` | UI bind port. |
+| `-teamserver` | `http://127.0.0.1:8080` | Allowed REST proxy target. |
+
+## UI screenshots
+
+![Session graph](/img/graph_sessions.png)
+
+![Session table](/img/table_sessions.png)

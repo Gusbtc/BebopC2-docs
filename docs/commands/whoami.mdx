@@ -1,0 +1,32 @@
+---
+title: whoami
+description: Return current Windows or Linux user name.
+---
+
+# whoami
+
+## Usage
+
+```text
+[BEBOP ~]$ whoami
+```
+
+## How it works
+
+Windows handles this inside `builtin_dispatch` with dynamically resolved `GetUserNameA`. Linux uses `getuid`, `geteuid`, `getgid`, `getegid`, `getpwuid`, `getgrgid`, and `getgroups` from `beacon-linux/src/exec/builtin.c`.
+
+## Output
+
+Windows returns the username from `GetUserNameA`:
+
+```text
+Administrator
+```
+
+Linux returns numeric/user identity from `getuid`, `geteuid`, `getgid`, `getegid`, and supplementary groups:
+
+```text
+uid=0(root) gid=0(root) euid=0(root) egid=0(root) groups=0(root)
+```
+
+Use `getintegrity` on Windows when you need integrity level.

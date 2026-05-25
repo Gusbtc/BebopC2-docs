@@ -1,0 +1,41 @@
+---
+title: Hardening checklist
+description: Defensive checklist for safer BebopC2 operation.
+---
+
+# Hardening checklist
+
+Use this checklist before running an exercise outside a disposable lab.
+
+## Teamserver
+
+- Run as a dedicated low-privilege user.
+- Restrict inbound firewall rules.
+- Keep management interfaces private.
+- Use TLS for operator access when crossing a network boundary.
+- Rotate RSA keys between unrelated engagements.
+- Store `~/.bebop/` on encrypted storage when possible.
+
+## Operator client
+
+- Put browser access behind external authentication.
+- Avoid shared browser profiles for operations.
+- Clear downloaded loot and generated beacon artifacts after use.
+- Keep screenshots and exports in the engagement evidence store.
+
+## Beacon builds
+
+- Generate fresh builds per listener or engagement.
+- Check generated strings before shipping.
+- Keep profiles and listener settings consistent with the approved scope.
+- Do not reuse test beacons in production-like exercises.
+
+## Logging
+
+- Preserve event logs for reporting.
+- Avoid logging secrets into terminal notes.
+- Export only the evidence needed by the engagement.
+
+## Future hardening work
+
+Planned areas include malleable profiles, direct syscalls, sleep masking, and stronger profile validation.

@@ -1,0 +1,58 @@
+---
+title: Beacon Overview
+description: Beacon lifecycle and platform capabilities.
+---
+
+# Beacon Overview
+
+Beacons are asynchronous agents. They do not require a persistent connection for normal tasking. They register, sleep, check in, receive tasks, execute supported actions, and return encrypted results.
+
+## Lifecycle
+
+```text
+start
+  -> resolve APIs and config
+  -> fetch public key
+  -> register metadata and session key
+  -> sleep with jitter
+  -> check in
+  -> execute tasks
+  -> send results
+  -> repeat
+```
+
+## Metadata
+
+Registration includes:
+
+- Beacon ID
+- Listener ID
+- Session key material
+- Sleep and jitter
+- Username
+- Hostname
+- Process name
+- Process ID
+- Architecture
+- Platform
+- Integrity level where available
+
+## Capability model
+
+Commands are platform-specific. The UI should offer only commands supported by the selected beacon.
+
+| Capability | Windows | Linux |
+| --- | --- | --- |
+| Process execution | Yes | Yes |
+| Native builtins | Yes | Yes |
+| File transfer | Yes | Yes |
+| Interactive shell | Yes | Yes |
+| SOCKS5 | Yes | Yes |
+| execute-assembly | Yes | No |
+| inline-assembly | Yes | No |
+
+## Sleep and jitter
+
+Sleep controls the base callback interval. Jitter randomizes the next delay by percentage. Long sleep values reduce traffic, but they also increase operator wait time.
+
+For low-latency workflows, use session mode when authorized and reachable.

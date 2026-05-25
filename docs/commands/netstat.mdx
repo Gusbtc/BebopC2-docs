@@ -1,0 +1,33 @@
+---
+title: netstat
+description: List TCP and UDP sockets.
+---
+
+# netstat
+
+## Usage
+
+```text
+[BEBOP ~]$ netstat
+```
+
+## How it works
+
+Windows calls `GetExtendedTcpTable` and `GetExtendedUdpTable` with owner-PID tables. Linux parses `/proc/net/tcp`, `/proc/net/tcp6`, `/proc/net/udp`, and `/proc/net/udp6`. Linux PID/process lookup is only attempted as root; non-root output uses `-` for PID when ownership cannot be resolved.
+
+## Output
+
+Windows:
+
+```text
+Proto  Local                Remote               State          PID
+TCP    0.0.0.0:445          0.0.0.0:0            LISTEN         4
+UDP    0.0.0.0:5353         *:*
+```
+
+Linux includes process metadata when resolvable:
+
+```text
+PROTO  LOCAL                 REMOTE                STATE       PID     PROCESS
+tcp    0.0.0.0:22            0.0.0.0:0             LISTEN      811     sshd
+```

@@ -1,0 +1,30 @@
+---
+title: domain
+description: Return Windows DNS domain membership.
+---
+
+# domain
+
+## Usage
+
+```text
+[BEBOP ~]$ domain
+```
+
+## How it works
+
+Windows calls dynamically resolved `GetComputerNameExA` with `ComputerNameDnsDomain`. Empty or failed lookup is treated as not domain-joined.
+
+## Output
+
+```text
+support.htb
+```
+
+If the machine is not domain-joined:
+
+```text
+(not domain-joined)
+```
+
+Windows-only native command.

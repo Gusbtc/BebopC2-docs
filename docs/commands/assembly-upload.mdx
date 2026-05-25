@@ -1,0 +1,25 @@
+---
+title: assembly-upload
+description: Upload a .NET assembly into teamserver library.
+---
+
+# assembly-upload
+
+## Usage
+
+```text
+[BEBOP ~]$ assembly-upload <name>
+```
+
+## How it works
+
+The browser opens a file picker and posts multipart data to `/api/assemblies`. The teamserver validates the name, stores bytes under `~/.bebop/assemblies/`, publishes a library update, and writes an event log entry.
+
+## Output
+
+```text
+[*] select .NET assembly to upload as "Rubeus.exe"...
+[+] assembly "Rubeus.exe" uploaded (462848 bytes)
+```
+
+The file is stored under `~/.bebop/assemblies/`.

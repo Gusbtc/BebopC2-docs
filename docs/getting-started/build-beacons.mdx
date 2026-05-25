@@ -1,0 +1,66 @@
+---
+title: Building Beacons
+description: Tailoring and compiling modular implants.
+---
+
+# Building Beacons
+
+The BebopC2 build pipeline copies the beacon source to a temporary directory, injects listener settings, regenerates build-time generated headers, runs CMake, and returns the compiled artifact to the operator.
+
+## The Modular Pipeline
+
+The current pipeline performs these steps:
+
+1. **Configuration injection:** Writes callback port, sleep, jitter, TLS flags, and optional session port into `include/config.h`.
+2. **XOR string generation:** Regenerates `obf_strings.h` with the listener host and command/runtime strings.
+3. **Windows API hashing:** Regenerates `api_hashes.h` for Windows builds.
+4. **CMake build:** Uses MinGW for Windows and `musl-gcc`/`gcc` for Linux.
+5. **Optional shellcode conversion:** Converts Windows EXE output to `.bin` with `python3-donut` when the operator selects shellcode format.
+
+## Build Workflows
+
+### 1. The Operator UI (Recommended)
+Navigate to the **Build** page. This is the primary interface for weaponization.
+
+**Inputs:**
+- **Platform:** Windows or Linux.
+- **Listener:** Callback destination.
+- **Sleep:** Base callback interval in milliseconds.
+- **Jitter:** Randomization percentage.
+- **Format:** Windows EXE, Windows shellcode `.bin`, or Linux ELF depending on platform.
+
+### 2. Manual Verification
+For lab development, you can invoke the builder via CMake:
+
+```bash
+cd beacon
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+## OPSEC: The "No CRT" Strategy
+
+To achieve industry-leading evasion, BebopC2 beacons do not utilize the standard C library (`msvcrt.dll`). This means:
+
+*   **No Fixed Imports:** The Import Address Table (IAT) does not contain suspicious functions like `printf`, `malloc`, or `CreateRemoteThread`.
+*   **DJB2 Hashing:** All system functions are resolved at runtime via PEB (Process Environment Block) walking.
+*   **Static Footprint:** A standard Windows beacon is typically under **100 KB**, making it extremely difficult to detect via traditional signature-based scanners.
+
+## Building Modules
+
+High-level modules like the **Managed Bridge** are built by `setup-teamserver.sh`. Manual rebuild:
+
+```bash
+cd managed-bridge/Bebop.ManagedBridge
+dotnet build -c Release
+```
+
+The setup script copies the resulting DLL to `teamserver/resources/Runtime.Loader.dll`, where the `inline-assembly` handler reads it.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| :--- | :--- |
+| **Missing Hash Error** | Run `go run ./cmd/regen` from `teamserver/` or rebuild through the normal builder path. |
+| **Connection Refused** | Ensure the listener's `LHOST` is reachable from the target network. |
+| **XOR Mismatch** | Synchronize `obf_strings.h` and the teamserver's obfuscation key. |

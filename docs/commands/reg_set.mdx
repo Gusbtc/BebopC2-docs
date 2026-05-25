@@ -1,0 +1,30 @@
+---
+title: reg_set
+description: Write a Windows REG_SZ value.
+---
+
+# reg_set
+
+## Usage
+
+```text
+[BEBOP ~]$ reg_set <HKLM\path|HKCU\path|HKCR\path|HKU\path> <value> <data>
+```
+
+## How it works
+
+Windows parses supported hive prefixes, opens the key with `RegOpenKeyExA(KEY_SET_VALUE)`, and writes the provided data as `REG_SZ` through `RegSetValueExA`.
+
+## Output
+
+```text
+reg_set: OK
+```
+
+Errors:
+
+```text
+reg_set: unknown hive
+reg_set: cannot open key (error 5)
+reg_set: failed (error 5)
+```

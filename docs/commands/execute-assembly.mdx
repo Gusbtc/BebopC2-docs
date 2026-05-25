@@ -1,0 +1,38 @@
+---
+title: execute-assembly
+description: Run .NET assembly through Donut and sacrificial process.
+---
+
+# execute-assembly
+
+## Usage
+
+```text
+[BEBOP ~]$ execute-assembly [args]
+[BEBOP ~]$ execute-assembly <name> [args]
+```
+
+No name opens a local file picker. A name loads from `~/.bebop/assemblies/`.
+
+## How it works
+
+The teamserver converts the assembly to shellcode with the builder path, queues `TaskExecAssembly`, and includes a spawn target. The beacon creates the target suspended, redirects pipes, writes shellcode with `VirtualAllocEx` / `WriteProcessMemory`, marks it executable with `VirtualProtectEx`, starts it with `CreateRemoteThread`, then reads stdout/stderr with `PeekNamedPipe` and `ReadFile`.
+
+## Output
+
+```text
+[*] assembly queued (label: 3827534869, shellcode: 24172 bytes)
+[+] task delivered to beacon
+[+] execute-assembly is working
+[+] hostname: DC
+[+] user: Administrator
+```
+
+Beacon-side errors:
+
+```text
+exec-asm: process creation failed
+exec-asm: injection failed
+exec-asm: thread creation failed
+exec-asm: timeout (120s)
+```

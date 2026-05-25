@@ -1,0 +1,88 @@
+---
+title: Inline Assembly
+description: Memory-resident .NET execution and adversary simulation.
+---
+
+# Inline Assembly
+
+`inline-assembly` runs a .NET Framework assembly inside the Windows x64 beacon process. In v1.5.0 it is implemented as a BOF-backed loader: the teamserver sends the native loader object, the managed bridge DLL, the target assembly bytes, and Windows-parsed arguments in one BOF task.
+
+## Flow
+
+```text
+inline-assembly command
+  -> POST /api/inline-assembly
+  -> teamserver reads Runtime.Loader.dll
+  -> teamserver reads InlineAssembly.Loader.x64.obj
+  -> teamserver packs bridge bytes, target assembly bytes, argv
+  -> queues TaskBOF
+  -> beacon runs loader BOF
+  -> loader hosts CLR v4.0.30319
+  -> loader loads bridge from memory
+  -> bridge loads target assembly and captures Console.Out/Error
+  -> loader emits formatted text result
+```
+
+## Usage
+
+```text
+[BEBOP ~]$ inline-assembly [--mode auto|bridge] [assembly] [args]
+[BEBOP ~]$ inline-assembly Rubeus.exe triage
+[BEBOP ~]$ inline-assembly --mode bridge Seatbelt.exe -group=user
+```
+
+No assembly name opens a local file picker. With a name, the teamserver loads it from `~/.bebop/assemblies/`.
+
+## Modes
+
+| Mode | Current behavior |
+| --- | --- |
+| `auto` | Alias for bridge mode. |
+| `bridge` | Required path. Uses `Runtime.Loader.dll` for output capture. |
+
+`direct` is intentionally rejected by the teamserver in v1.5.0. The bridge path is the supported path because output capture is reliable.
+
+## Output
+
+```text
+[BEBOP ~]$ inline-assembly --mode bridge Rubues.exe
+[*] select .NET assembly file for inline execution...
+[*] inline-assembly queued (label: 4176515639)
+[+] task delivered to beacon
+[inline-assembly]
+Exit: 0
+Duration: 63ms
+Truncated: false
+
+STDOUT:
+[+] execute-assembly is working
+[+] hostname: DC
+[+] user: Administrator
+```
+
+Loader failures return diagnostics as plain task output:
+
+```text
+Bridge invoke failed (0x8002000e)
+```
+
+## Supported entry points
+
+The bridge supports:
+
+- `Main()`
+- `Main(string[] args)`
+- `int Main()`
+- `int Main(string[] args)`
+- async `Task` entry points; `Task<int>` maps to exit code.
+
+Other signatures return an exception section.
+
+## Limits and risk
+
+- Windows x64 only.
+- Requires .NET Framework 4.x on target.
+- Teamserver requires .NET SDK 8.0+ to rebuild `Runtime.Loader.dll`.
+- CLR remains loaded in the beacon process after first use.
+- `Environment.Exit(...)` in the target assembly can terminate the beacon.
+- Use `execute-assembly` for unstable or untrusted tools that need process isolation.

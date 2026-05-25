@@ -1,0 +1,22 @@
+---
+title: interactive
+description: Start persistent session mode.
+---
+
+# interactive
+
+## Usage
+
+```text
+[BEBOP ~]$ interactive
+```
+
+## How it works
+
+The UI calls `/api/interactive`, the teamserver queues an interactive task, and the beacon opens a TCP session back to the session listener. Windows uses Winsock; Linux uses POSIX sockets. Session traffic uses length-prefixed encrypted envelopes and can fast-path tasks without waiting for HTTP polling.
+
+## Output
+
+The operator queues an interactive upgrade task. When the beacon connects back to the session listener, the session tab opens and further commands can be sent over the TCP session path.
+
+If the beacon cannot reach the session listener host/port, it remains in HTTP check-in mode.

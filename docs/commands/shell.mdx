@@ -1,0 +1,27 @@
+---
+title: shell
+description: Execute through platform shell.
+---
+
+# shell
+
+## Usage
+
+```text
+[BEBOP ~]$ shell <command>
+```
+
+## How it works
+
+With an argument, Windows wraps the command as `cmd.exe /c ...`, launches it with `CreateProcessA`, redirects stdout/stderr through an inherited pipe, and reads output for up to 30 seconds. Without an argument, the UI opens session shell mode.
+
+## Output
+
+Output is the shell command stdout/stderr. The beacon does not prepend fake status text.
+
+```text
+[BEBOP ~]$ shell whoami
+support\administrator
+```
+
+Windows uses `cmd.exe /c`. Linux uses `/bin/sh -c`.

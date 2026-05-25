@@ -1,0 +1,20 @@
+---
+title: priv-autologon
+description: Check Winlogon AutoLogon values through a built-in BOF.
+---
+
+# priv-autologon
+
+## Usage
+
+```text
+[BEBOP ~]$ priv-autologon
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `priv-autologon.x64.o`, accepts no arguments, queues `TaskBOF`, and returns output produced by the object.
+
+## Output
+
+The BOF prints discovered AutoLogon-related values or its own error text.

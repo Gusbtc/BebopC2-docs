@@ -1,0 +1,26 @@
+---
+title: sleep
+description: Update beacon callback interval.
+---
+
+# sleep
+
+## Usage
+
+```text
+[BEBOP ~]$ sleep <seconds> [jitter%]
+```
+
+## How it works
+
+The UI queues a `TaskSet` carrying interval and jitter. After delivery, the teamserver updates beacon metadata immediately; the beacon updates its local `sleep_ms` and `jitter_pct` before the next wait cycle.
+
+## Output
+
+The teamserver stores and publishes the update after delivery:
+
+```text
+[+] sleep=5s jitter=20%
+```
+
+Liveness threshold becomes `last_seen + sleep + 10 seconds`.

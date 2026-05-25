@@ -1,0 +1,56 @@
+---
+title: Build Page
+description: Operator workflow for beacon compilation.
+---
+
+# Build Page
+
+The Build page turns listener and platform settings into a beacon artifact.
+
+## Build options
+
+| Option | Meaning |
+| --- | --- |
+| Platform | Windows or Linux |
+| Listener | Callback destination |
+| Sleep | Base callback interval |
+| Jitter | Randomization percentage |
+| Format | Windows EXE, Windows shellcode, or Linux ELF depending on selected platform |
+
+## Windows outputs
+
+Supported outputs depend on the current builder implementation:
+
+- EXE
+- shellcode `.bin` through `python3-donut`
+
+The Windows build pipeline also regenerates obfuscated strings, API hashes, and listener config.
+
+## Linux outputs
+
+Linux builds produce a `beacon.elf` artifact.
+
+Linux builds use the Linux config header shape, mbedTLS crypto, and `musl-gcc` when available in the teamserver builder path.
+
+## Server-side validation
+
+The builder rejects invalid values before invoking CMake:
+
+| Field | Rule |
+| --- | --- |
+| Host | Alphanumeric, dot, and dash, up to `253` characters |
+| Port | `1` through `65535` |
+| Sleep | `1000` through `259200000` milliseconds |
+| Jitter | `0` through `100` percent |
+
+Temporary build directories are removed after the build completes or fails.
+
+## Validation
+
+After building:
+
+1. Record the listener used.
+2. Move artifact into a lab VM.
+3. Confirm network reachability to listener host and port.
+4. Run artifact only in an authorized test environment.
+5. Confirm registration in Sessions.

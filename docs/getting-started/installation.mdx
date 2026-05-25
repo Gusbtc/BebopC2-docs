@@ -1,0 +1,88 @@
+---
+title: Installation
+description: Install dependencies required to build and run BebopC2.
+---
+
+# Installation
+
+BebopC2 has five build surfaces:
+
+| Component | Language | Required tools |
+| --- | --- | --- |
+| Teamserver | Go | Go 1.25 or newer |
+| Operator client | Go + embedded static assets | Go 1.22 or newer |
+| Windows beacon | C / MinGW | `mingw-w64`, `cmake`, `nasm` |
+| Linux beacon | C / musl | `musl-gcc`, `cmake`, `libmbedtls-dev` |
+| .NET bridge build | C# | .NET SDK 8.0 or newer on the teamserver machine |
+
+## Repository layout
+
+```bash
+git clone https://github.com/Gusbtc/BebopC2.git
+cd BebopC2
+```
+
+Commands below assume the repository root unless noted.
+
+## Setup scripts
+
+The project includes setup scripts for common local environments:
+
+```bash
+chmod +x setup-teamserver.sh setup-operator.sh
+./setup-teamserver.sh
+./setup-operator.sh
+```
+
+`setup-teamserver.sh` checks Go 1.25+, MinGW, NASM, CMake, musl, mbedTLS, .NET SDK 8.0+, and `python3-donut`. It builds the managed bridge, the inline-assembly loader BOF, the teamserver, creates `~/.bebop/mcp.token` if missing, verifies the Windows beacon build, and starts the teamserver.
+
+The source release should include `teamserver/resources/bofs/manifest.json` plus the listed built-in objects. The setup script rebuilds `Runtime.Loader.dll` and `InlineAssembly.Loader.x64.obj`.
+
+`setup-operator.sh` checks Go and builds the operator client only.
+
+## Manual build
+
+```bash
+mkdir -p bin
+
+cd teamserver
+go mod tidy
+go build -o ../bin/teamserver .
+
+cd ../operator-client
+go mod tidy
+go build -o ../bin/operator-client .
+```
+
+The beacon is usually compiled from the operator console's Build page. For manual Windows beacon build testing:
+
+```bash
+cd beacon
+cmake -B build
+cmake --build build
+```
+
+## Runtime data
+
+Teamserver state is stored under `~/.bebop/`. The current release uses SQLite for major operational state and still keeps some compatibility files around generated state, keys, assemblies, and loot.
+
+Common paths:
+
+| Path | Purpose |
+| --- | --- |
+| `~/.bebop/rsa.pem` | Teamserver RSA key material |
+| `~/.bebop/assemblies/` | Uploaded .NET assembly library |
+| `~/.bebop/bofs/` | Uploaded operator BOF library |
+| `~/.bebop/jwt.key` | Operator JWT signing key |
+| `~/.bebop/mcp.token` | HTTP MCP bearer token |
+| `~/.bebop/exfil/` | Exfiltrated file storage |
+
+## Clean start
+
+For a fresh lab reset, stop all BebopC2 processes and move `~/.bebop/` out of the way:
+
+```bash
+mv ~/.bebop ~/.bebop.backup
+```
+
+Keep backups when validating release migrations or investigating a bug.

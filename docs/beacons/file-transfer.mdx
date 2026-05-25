@@ -1,0 +1,51 @@
+---
+title: File Transfer
+description: Upload and download files through beacon tasks.
+---
+
+# File Transfer
+
+BebopC2 supports chunked file upload and download through beacon tasks.
+
+## Download from beacon
+
+Use `download` or the file browser to stage a file from the beacon to teamserver loot.
+
+Good practice:
+
+- Use exact paths.
+- Confirm file size first when possible.
+- Avoid broad directory collection.
+- Record why the file was collected.
+
+## Upload to beacon
+
+Use `upload` or file browser upload to send a local file to the beacon.
+
+Check:
+
+- Destination path exists.
+- Operator has authorization to write there.
+- Beacon user context has permissions.
+
+## Chunking
+
+Transfers are chunked to avoid oversized protocol messages. Large transfers may take multiple check-ins unless session mode is active.
+
+| Path | Task type | Chunk size | Notes |
+| --- | --- | --- | --- |
+| Upload to beacon | `TaskFileStage` (`3`) | `64 KiB` | Fragment `0` carries destination path metadata plus first chunk. |
+| Download from beacon | `TaskFileExfil` (`4`) | `64 KiB` | Fragment `0` carries filename metadata plus first chunk. |
+
+The teamserver caps assembled exfil at `100 MiB` and `16384` fragments. Uploaded operator files are capped at `256 MiB` by the HTTP handler.
+
+Loot bytes default to `~/.bebop/exfil/`. `BEBOP_LOOT_DIR` overrides that directory.
+
+## Troubleshooting
+
+| Symptom | Likely issue |
+| --- | --- |
+| Transfer stalls | Beacon sleep too long or lost session mode |
+| File missing in loot | Upload route failed or label mismatch |
+| Permission denied | Beacon user context lacks access |
+| Corrupt output | Interrupted transfer or partial chunk sequence |

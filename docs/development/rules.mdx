@@ -1,0 +1,60 @@
+---
+title: Development rules
+description: Required engineering rules for beacon, protocol, release, and frontend changes.
+---
+
+# Development rules
+
+These rules protect the properties that make BebopC2 useful in authorized labs: predictable builds, low-noise beacon artifacts, and protocol compatibility.
+
+## Beacon strings
+
+Every new hardcoded string in beacon C code must be XOR-obfuscated.
+
+Workflow:
+
+1. Add the string entry to `teamserver/obfgen/obfgen.go`.
+2. Regenerate `beacon/include/obf_strings.h`.
+3. Decode at the call site with `xor_dec()` or `xor_dec_w()`.
+4. Free decoded buffers after use when the helper returns allocated memory.
+5. Check the final binary with `strings`.
+
+Do not add plaintext module names, URL paths, command names, registry paths, file names, or .NET runtime strings directly to beacon C files.
+
+## Beacon Windows APIs
+
+Every new Windows API call in beacon code must use dynamic resolution.
+
+Workflow:
+
+1. Add the function hash to `teamserver/hashgen/hashgen.go`.
+2. Regenerate `beacon/include/api_hashes.h`.
+3. Add the function pointer declaration in `beacon/src/resolve/dynapi.c`.
+4. Resolve it through `resolve_function()` using the generated DJB2 hash.
+5. Call the resolved function pointer, not the imported API symbol.
+
+Direct Win32 imports make beacon behavior easier to fingerprint and should be avoided.
+
+## Protocol changes
+
+Protocol changes must be version-aware. If a task type, wire field, or encryption behavior changes, update both sides together:
+
+- teamserver models and route handlers
+- protocol serializer/deserializer
+- beacon task parser and result builder
+- operator UI labels and command forms
+- public docs content
+
+## Frontend changes
+
+Operator UI changes live under `operator-client/static/`. Keep the interface dense, predictable, and useful for repeated operator workflows.
+
+Avoid one-off UI patterns. Prefer the existing page structure, tables, action buttons, modals, and terminal behavior unless the workflow clearly needs a new component.
+
+## Release metadata
+
+For a release:
+
+- Update `teamserver/version/version.go`.
+- Keep the GitHub latest-release URL pointed at `https://api.github.com/repos/Gusbtc/BebopC2/releases/latest`.
+- Update public release notes.

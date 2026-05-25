@@ -1,0 +1,50 @@
+---
+title: Beacon connectivity
+description: Debugging registration, check-in, and result delivery.
+---
+
+# Beacon connectivity
+
+Beacon connectivity issues usually fall into one of three phases: registration, check-in, or result upload.
+
+## Registration
+
+Confirm:
+
+- the listener is active
+- `/api/pubkey` is reachable from the beacon network path
+- the beacon build contains the correct listener host
+- HTTPS settings match the listener
+- RSA key material exists under the teamserver persistence directory
+
+Registration failures prevent a session from appearing in the console.
+
+## Check-in
+
+If a session appears but does not update:
+
+- check the last-seen timestamp
+- verify beacon sleep and jitter settings
+- inspect listener logs and events
+- confirm the listener route is reachable from the target network
+
+Queued tasks are delivered during check-in, not immediately at queue time.
+
+## Results
+
+If tasks run but output is missing:
+
+- verify `/api/result` accepts the beacon request
+- check HMAC or decrypt errors in server logs
+- confirm result size is within the supported path
+- test with a small command before retrying a large payload
+
+## Network tests
+
+From a lab host on the same path, test the listener with simple HTTP tooling before debugging beacon internals:
+
+```bash
+curl -i http://127.0.0.1:8080/api/pubkey
+```
+
+For HTTPS listeners, confirm certificate behavior matches the beacon configuration.

@@ -1,0 +1,44 @@
+---
+title: Common issues
+description: Frequent BebopC2 setup and runtime problems.
+---
+
+# Common issues
+
+## Operator cannot reach the teamserver
+
+Check that the teamserver is running and listening on the expected port:
+
+```bash
+./bin/teamserver -port 8080
+```
+
+Then confirm the operator client is pointed at the same API origin expected by the UI.
+
+## No sessions appear
+
+Likely causes:
+
+- listener is not running
+- beacon was built with the wrong host or port
+- firewall blocks beacon egress
+- TLS settings do not match the listener
+- registration failed before session persistence
+
+Use the event log first. It shows listener startup, successful registration, and tasking errors faster than packet capture. Registration failures before metadata decode may only appear in HTTP/server logs.
+
+## Commands queue but do not return output
+
+Check:
+
+- beacon sleep interval
+- session last-seen timestamp
+- task limit per check-in
+- unsupported command mode
+- result polling in the UI
+
+If the beacon is alive but output is missing, test with a minimal built-in command before retrying heavier features.
+
+## Loot list is empty
+
+Confirm the upload completed and the label used by the beacon matches the expected loot route. Large transfers should use chunked upload paths rather than task-sized payloads.

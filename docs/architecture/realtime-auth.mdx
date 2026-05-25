@@ -1,0 +1,86 @@
+---
+title: Realtime and auth
+description: Operator authentication, CORS, WebSocket topics, and session channels.
+---
+
+# Realtime and auth
+
+BebopC2 separates beacon transport from operator transport. Beacon routes are available to listeners, while operator routes require JWT authentication.
+
+## Authentication flow
+
+| Step | Route | Behavior |
+| --- | --- | --- |
+| Login | `POST /api/auth/login` | Validates username and password, returns a JWT. |
+| API calls | `Authorization: Bearer <token>` | Management handlers validate the token and attach the operator name to the request context. |
+| WebSocket ticket | `POST /api/ws-ticket` | Returns a short-lived, one-use ticket for browser WebSocket connections. |
+| Logout | `POST /api/auth/logout` | Revokes the current token. |
+| Token purge | Background goroutine | Expired revoked tokens are periodically removed. |
+
+Login has no source-IP rate limiter in the current handler. Password checks use bcrypt and include a dummy bcrypt comparison for unknown users to reduce username-timing differences.
+
+## CORS
+
+The teamserver allows origins configured by `BEBOP_ALLOWED_ORIGINS`. If the variable is not set, REST CORS allows all origins while browser WebSockets allow localhost origin patterns.
+
+```text
+BEBOP_ALLOWED_ORIGINS=http://localhost:9090
+```
+
+Use this when the operator client is served from a different host or port than the management API.
+
+## Operator WebSocket
+
+Route:
+
+```text
+/ws/operator?ticket=<ticket>
+```
+
+The browser obtains the ticket with `POST /api/ws-ticket` before opening the socket. Legacy JWT query-string WebSocket auth is disabled by default. Set `BEBOP_WS_LEGACY_QUERY_TOKEN=1` only for temporary compatibility.
+
+On connect, the server sends sync snapshots for:
+
+| Topic | Snapshot |
+| --- | --- |
+| `sessions` | Current beacon list with mode, shell, and SOCKS state. |
+| `listeners` | Listener definitions. |
+| `events` | Event timeline. |
+| `loot` | Exfil metadata. |
+| `chat` | Last 200 chat messages. |
+
+After the initial sync, server-side changes are published through the hub as:
+
+```json
+{
+  "topic": "sessions",
+  "action": "update",
+  "data": {}
+}
+```
+
+The hub uses bounded subscriber channels. If a browser cannot keep up, events can be dropped for that subscriber instead of blocking the server.
+
+## Chat
+
+Chat messages are sent through `/ws/operator` with topic `chat` and action `send`. The server ignores the operator name supplied by the browser and uses the JWT subject instead.
+
+Limits:
+
+| Limit | Value |
+| --- | --- |
+| Empty message | Rejected |
+| Message length | `2000` characters |
+| Rate limit | Burst `10`, then `1` message per second per operator |
+| Sync history | Last `200` messages |
+
+## Session and shell WebSockets
+
+Session-mode output is bridged to the browser through:
+
+```text
+/ws/session/{beacon_id}?ticket=<ticket>
+/ws/shell/{beacon_id}?ticket=<ticket>
+```
+
+These WebSockets are operator-facing views over persistent TCP channels from the beacon. They do not replace the encrypted beacon envelope.

@@ -1,0 +1,20 @@
+---
+title: sql-info
+description: Gather SQL Server information through a built-in BOF.
+---
+
+# sql-info
+
+## Usage
+
+```text
+[BEBOP ~]$ sql-info <server> [database]
+```
+
+## How it works
+
+Windows x64 built-in BOF. The teamserver resolves `sql-info.x64.o` and packs one or two string arguments before queuing `TaskBOF`.
+
+## Output
+
+The BOF prints SQL Server metadata using the beacon's reachable network and current credentials.

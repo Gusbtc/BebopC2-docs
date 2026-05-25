@@ -1,0 +1,66 @@
+---
+title: Repository layout
+description: How the BebopC2 source tree is organized.
+---
+
+# Repository layout
+
+BebopC2 keeps the operational pieces separated so the teamserver, operator client, and beacon can evolve without sharing build systems.
+
+```text
+teamserver/           Go HTTP API, beacon state, listeners, build pipeline
+operator-client/      Go static-file server plus browser console assets
+beacon/               C Win32 x64 implant
+documentation/        Public documentation content
+bin/                  Local build outputs
+docs/                 Project planning notes and implementation specs
+```
+
+## Teamserver
+
+`teamserver/` is the control plane. It owns HTTP routes, listener lifecycle, task queues, result storage, event logging, persistence, cryptographic protocol code, and beacon build generation.
+
+Important directories:
+
+- `server/`: API handlers and route wiring.
+- `store/`: SQLite-backed synchronized state.
+- `models/`: shared data structures for sessions, tasks, results, listeners, terminals, loot, and events.
+- `protocol/`: binary serialization, RSA key exchange, AES-CBC encryption, HMAC validation, and HMAC-labeled subkey derivation.
+- `builder/`: beacon compilation pipeline.
+- `obfgen/`: XOR string generator for beacon builds.
+- `hashgen/`: API hash generator used by the beacon resolver.
+- `persist/`: asynchronous JSON persistence under `~/.bebop/`.
+
+## Operator client
+
+`operator-client/` serves the browser interface and embeds the static files during Go compilation.
+
+Important directories:
+
+- `static/pages/`: HTML pages for sessions, listeners, build, interaction, and loot.
+- `static/js/app/`: shared operator logic, API calls, terminal behavior, file browser, views, WebSocket, and UI state.
+- `static/css/`: styling for the console.
+
+The operator client is intentionally thin: most state-changing actions go through the teamserver management API.
+
+## Beacon
+
+`beacon/` contains the Windows x64 beacon. It avoids a normal CRT-heavy import profile and resolves Win32 APIs dynamically through PEB walking and DJB2 hashes.
+
+Important directories:
+
+- `src/main.c`: entry point and check-in loop.
+- `src/comms/`: HTTP transport and session-mode routing.
+- `src/protocol/`: AES-CBC, HMAC-SHA256, HMAC-labeled subkeys, and message framing.
+- `src/exec/`: command execution, built-ins, BOF loader, execute-assembly, and task dispatch.
+- `src/resolve/`: PEB-based module walking and API resolution.
+- `src/transfer/`: chunked upload and download helpers.
+- `include/`: public beacon headers plus generated `api_hashes.h` and `obf_strings.h`.
+
+## Module resources
+
+- `modules/inline-assembly/InlineAssembly.Loader.c`: native loader BOF source.
+- `managed-bridge/Bebop.ManagedBridge/`: C# bridge that captures managed stdout/stderr.
+- `teamserver/resources/InlineAssembly.Loader.x64.obj`: compiled inline loader object used by the teamserver.
+- `teamserver/resources/Runtime.Loader.dll`: compiled managed bridge used by the teamserver.
+- `teamserver/resources/bofs/`: read-only built-in BOF library and manifest.

@@ -1,0 +1,54 @@
+---
+title: Sessions
+description: Session table, graph, liveness, and interaction.
+---
+
+# Sessions
+
+A session is a registered beacon known to the teamserver. Sessions can be alive, stale, pending exit, or restored from persistence.
+
+## Session fields
+
+| Field | Description |
+| --- | --- |
+| ID | Beacon identifier |
+| Hostname | Host reported by the beacon |
+| Username | User context |
+| Process | Beacon process name |
+| PID | Beacon process ID |
+| Architecture | x86, x64, ARM, or ARM64 |
+| Platform | Windows, Linux, or future platform |
+| Integrity | Windows integrity level where available |
+| Sleep | Base callback interval |
+| Jitter | Sleep randomization |
+| Listener | Listener used during registration |
+| Last seen | Last registration/check-in/result update |
+
+## Liveness
+
+Liveness uses the beacon sleep and jitter values plus a buffer. This avoids marking slow beacons as dead just because they do not check in every few seconds.
+
+The threshold is:
+
+```text
+last_seen + sleep + 10 seconds
+```
+
+## Actions
+
+Common actions:
+
+- Interact
+- Open file browser
+- Start session mode
+- Start SOCKS5
+- Queue command
+- Kill beacon
+
+Kill behavior depends on liveness. If the beacon is considered dead and has no active session, the teamserver removes it immediately. If it is alive, the teamserver queues `TaskExit` and waits for the result. A timeout cleanup removes pending-exit sessions if no result arrives.
+
+## Session mode
+
+Session mode upgrades from periodic check-ins to a persistent TCP channel. It is useful for low-latency terminal and task workflows.
+
+Use session mode only when the beacon can reach the session listener host and port.

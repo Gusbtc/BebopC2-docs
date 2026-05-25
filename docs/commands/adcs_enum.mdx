@@ -1,0 +1,20 @@
+---
+title: adcs_enum
+description: Enumerate ADCS through a built-in BOF.
+---
+
+# adcs_enum
+
+## Usage
+
+```text
+[BEBOP ~]$ adcs_enum [target]
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF. The teamserver resolves `adcs_enum.x64.o`, packs one optional wide-string argument, queues `TaskBOF`, and the beacon executes the object in-process.
+
+## Output
+
+Output is produced by the BOF and depends on domain reachability, LDAP/RPC access, and the current token context.

@@ -1,0 +1,29 @@
+---
+title: assembly-list
+description: List uploaded .NET assemblies.
+---
+
+# assembly-list
+
+## Usage
+
+```text
+[BEBOP ~]$ assembly-list
+```
+
+## How it works
+
+The operator queries `/api/assemblies`. The teamserver lists files from the assembly library directory and returns name/size metadata; no beacon task is queued.
+
+## Output
+
+```text
+Assemblies:
+  Rubeus.exe  (462848 bytes)
+```
+
+Empty library:
+
+```text
+(no assemblies in library)
+```

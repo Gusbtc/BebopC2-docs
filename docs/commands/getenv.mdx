@@ -1,0 +1,35 @@
+---
+title: getenv
+description: Read one environment variable.
+---
+
+# getenv
+
+## Usage
+
+```text
+[BEBOP ~]$ getenv <var>
+```
+
+## How it works
+
+Windows calls dynamically resolved `GetEnvironmentVariableA`. Linux calls `getenv` after trimming the argument name.
+
+## Output
+
+```text
+[BEBOP ~]$ getenv USERNAME
+Administrator
+```
+
+Missing Windows variable:
+
+```text
+getenv: 'NOPE' not found
+```
+
+Missing Linux variable:
+
+```text
+NOPE: not set
+```

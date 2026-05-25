@@ -1,0 +1,25 @@
+---
+title: services
+description: Enumerate Windows services.
+---
+
+# services
+
+## Usage
+
+```text
+[BEBOP ~]$ services
+```
+
+## How it works
+
+Windows opens the Service Control Manager with `OpenSCManagerA` and enumerates service state/PID via `EnumServicesStatusExA`.
+
+## Output
+
+```text
+  BFE                                       RUNNING   PID 920
+  Spooler                                   STOPPED   PID 0
+```
+
+Windows-only native command.

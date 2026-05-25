@@ -1,0 +1,20 @@
+---
+title: schtasks-enum
+description: Enumerate scheduled tasks through a built-in BOF.
+---
+
+# schtasks-enum
+
+## Usage
+
+```text
+[BEBOP ~]$ schtasks-enum [target]
+```
+
+## How it works
+
+This is a Windows x64 built-in BOF from `teamserver/resources/bofs/manifest.json`. The terminal sends it through `/api/bof`; the teamserver resolves `schtasks-enum.x64.o`, packs one optional wide-string target argument, queues `TaskBOF`, and the beacon runs it with the in-process COFF loader.
+
+## Output
+
+Output comes from the BOF. Empty output means the BOF returned no text, not that the teamserver fabricated a result.

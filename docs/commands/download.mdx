@@ -1,0 +1,31 @@
+---
+title: download
+description: Exfiltrate a file from target to teamserver loot.
+---
+
+# download
+
+## Usage
+
+```text
+[BEBOP ~]$ download <remote_path>
+```
+
+## How it works
+
+The operator queues `TaskFileExfil`. The beacon opens the remote file, gets its size, reads `64 KiB` chunks, and sends fragmented `TASK_FILE_EXFIL` results. The teamserver assembles fragments into Loot.
+
+## Output
+
+When all fragments are assembled:
+
+```text
+[+] exfil complete: C:\Users\Administrator\Documents\loot.txt
+    check the LOOT tab to download or delete
+```
+
+Errors use the `exfil:` prefix, for example:
+
+```text
+exfil: open failed (0x00000002)
+```

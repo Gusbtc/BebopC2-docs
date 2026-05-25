@@ -1,0 +1,43 @@
+---
+title: SOCKS5
+description: SOCKS5 proxy pivoting through beacon channels.
+---
+
+# SOCKS5
+
+SOCKS5 creates a local proxy on the teamserver side and relays traffic through a beacon channel.
+
+## Use cases
+
+- Access an approved internal lab service through a beacon.
+- Validate network reachability from the beacon's perspective.
+- Route a browser or tool through the beacon for authorized testing.
+
+## Default behavior
+
+The teamserver assigns local proxy ports from the configured range, typically `1080-1099`.
+
+The SOCKS server supports no-auth SOCKS5 and CONNECT requests. IPv4, domain, and IPv6 address forms are parsed and forwarded to the beacon as channel-open messages.
+
+## Operator workflow
+
+1. Select a beacon.
+2. Start SOCKS5.
+3. Note the local host and port.
+4. Configure tooling to use the local SOCKS5 proxy.
+5. Stop SOCKS5 when finished.
+
+## Reliability notes
+
+SOCKS traffic is sensitive to latency and beacon stability. Prefer session mode when available and stop unused proxies.
+
+Each accepted SOCKS client gets a channel ID. The teamserver sends `TaskSocksOpen`, waits for an ACK, relays `TaskSocksData`, and closes the channel with `TaskSocksClose` when either side ends.
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| Proxy port unavailable | Another SOCKS proxy already bound |
+| Connections hang | Beacon cannot reach destination |
+| Proxy stops unexpectedly | Beacon disconnected or session channel closed |
+| Corrupt framing | Concurrent writes must be guarded by connection mutexes |
